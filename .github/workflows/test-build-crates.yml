@@ -52,8 +52,8 @@ jobs:
 
       - name: Determine changed crates
         id: set-crates
-        needs: changed-files
         env: 
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
           csm_rs_any_changed: ${{ steps.changed-files.outputs.csm_rs_any_changed }}
           manta_ws_any_changed: ${{ steps.changed-files.outputs.manta_ws_any_changed }}
           manta_backend_dispatcher_any_changed: ${{ steps.changed-files.outputs.manta_backend_dispatcher_any_changed }}
