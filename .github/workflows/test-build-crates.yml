@@ -39,15 +39,15 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           files: |
-            csm-rs:
+            csm_rs:
               crates/csm-rs/**
-            manta-ws:
+            manta_ws:
               crates/manta-ws/**
-            manta-backend-dispatcher:
+            manta_backend_dispatcher:
               crates/manta-backend-dispatcher/**
             manta:
               crates/manta/**
-            ochami-rs:
+            ochami_rs:
               crates/ochami_rs/**
 
       - name: Determine changed crates
@@ -57,7 +57,7 @@ jobs:
           # List all crates as a space-separated string
           for crate in csm_rs manta manta_backend_dispatcher manta_ws ochami_rs; do
             # Construct the variable name for the crate's changed status
-            var_name="${crate}_any_changed"
+            var_name="steps.changed-files-yaml.outputs.${crate}_any_changed"
             # Check if any file in the crate's directory changed
             echo "var name: $var_name"
             echo "var value: ${!var_name}"
