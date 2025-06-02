@@ -61,7 +61,7 @@ jobs:
           ochami_rs_any_changed: ${{ steps.changed-files.outputs.ochami_rs_any_changed }}
 
         run: |
-          env | grep -i changed
+          env
           #set | grep -E '^[^ ]+='
           CHANGED_CRATES=""
             for crate in csm_rs manta manta_backend_dispatcher manta_ws ochami_rs; do
