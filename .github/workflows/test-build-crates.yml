@@ -62,21 +62,21 @@ jobs:
         run: |
           set | grep -E '^[^ ]+='
           CHANGED_CRATES=""
-          for crate in csm_rs manta manta_backend_dispatcher manta_ws ochami_rs; do
-          # Check if any file in the crate's directory or workspace files changed
-            var_name="${crate}_any_changed"
-            #echo $var_name
-            #echo ${!var_name}
-            if [[ "${!var_name}" == "true" ]]; then
-                echo "$var_name is true"
-            # Append crate name to the string (space-separated)
-            if [ -z "$CHANGED_CRATES" ]; then
-                CHANGED_CRATES="$(echo $crate | tr '_' '-')"
-            else
-              CHANGED_CRATES="$CHANGED_CRATES $(echo $crate | tr '_' '-')"
-            fi
-          fi
-        done
+            for crate in csm_rs manta manta_backend_dispatcher manta_ws ochami_rs; do
+            # check if any file in the crate's directory or workspace files changed
+                var_name="${crate}_any_changed"
+                #echo $var_name
+                #echo ${!var_name}
+                if [[ "${!var_name}" == "true" ]]; then
+                    echo "$var_name is true"
+                # append crate name to the string (space-separated)
+                if [ -z "$changed_crates" ]; then
+                    changed_crates="$(echo $crate | tr '_' '-')"
+                else
+                  changed_crates="$changed_crates $(echo $crate | tr '_' '-')"
+                fi
+              fi
+          done
 
           #echo "test variable ${{ steps.changed-files.outputs.csm_rs_any_changed }}"
 
