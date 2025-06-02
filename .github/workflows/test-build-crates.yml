@@ -52,7 +52,6 @@ jobs:
 
       - name: Determine changed crates
         id: set-crates
-        needs: changed-files
         env: 
           csm_rs_any_changed: ${{ steps.changed-files.outputs.csm_rs_any_changed }}
           manta_ws_any_changed: ${{ steps.changed-files.outputs.manta_ws_any_changed }}
@@ -61,7 +60,8 @@ jobs:
           ochami_rs_any_changed: ${{ steps.changed-files.outputs.ochami_rs_any_changed }}
 
         run: |
-          set | grep -E '^[^ ]+='
+          env | grep any_changed
+          #set | grep -E '^[^ ]+='
           CHANGED_CRATES=""
             for crate in csm_rs manta manta_backend_dispatcher manta_ws ochami_rs; do
             # check if any file in the crate's directory or workspace files changed
