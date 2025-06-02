@@ -40,7 +40,7 @@ jobs:
         with:
           files: |
             csm_rs:
-              - crates/csm-rs/**'
+              - crates/csm-rs/**
             manta_ws:
               - crates/manta-ws/**
             manta_backend_dispatcher:
