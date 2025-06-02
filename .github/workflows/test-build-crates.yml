@@ -46,22 +46,29 @@ jobs:
       - name: Determine changed crates
         id: set-crates
         run: |
-          CHANGED_CRATES=()
+          # Initialize an empty string to store changed crate names
+          CHANGED_CRATES=""
           if [[ "${{ steps.changed-files.outputs.any_changed }}" == "true" ]]; then
-            # List all crates
-            ALL_CRATES=("csm-rs" "manta" "manta-backend-dispatcher" "manta-ws" "ochami-rs")
-            for crate in "${ALL_CRATES[@]}"; do
+            # List all crates as a space-separated string
+            for crate in csm-rs manta manta-backend-dispatcher manta-ws ochami-rs; do
               # Check if any file in the crate's directory or workspace files changed
               if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q -e "^crates/$crate/" -e "^Cargo.toml" -e "^Cargo.lock"; then
-                CHANGED_CRATES+=("$crate")
+                # Append crate name to the string (space-separated)
+                if [ -z "$CHANGED_CRATES" ]; then
+                  CHANGED_CRATES="$crate"
+                else
+                  CHANGED_CRATES="$CHANGED_CRATES $crate"
+                fi
               fi
             done
           fi
-          # Convert array to JSON for matrix
-          if [ ${#CHANGED_CRATES[@]} -eq 0 ]; then
+
+          # Convert space-separated crate names to JSON array
+          if [ -z "$CHANGED_CRATES" ]; then
             echo "crates=[]" >> $GITHUB_OUTPUT
           else
-            CRATES_JSON=$(printf '%s\n' "${CHANGED_CRATES[@]}" | jq -R . | jq -s .)
+            # Convert space-separated string to JSON array using jq
+            CRATES_JSON=$(echo "$CHANGED_CRATES" | tr ' ' '\n' | jq -R . | jq -s .)
             echo "crates=$CRATES_JSON" >> $GITHUB_OUTPUT
           fi
         env:
