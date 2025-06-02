@@ -34,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0  # Full history for accurate diff
       - name: Get changed files
-        id: changed-files
+        id: changed-files-print
         uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
         # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
         # with:
