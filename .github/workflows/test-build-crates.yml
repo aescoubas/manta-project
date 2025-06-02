@@ -36,19 +36,19 @@ jobs:
 
       - name: Identify changed files
         id: changed-files
-        uses: tj-actions/changed-files@v46.0.5
+        uses: tj-actions/changed-files@v46
         with:
           files: |
             csm_rs:
-              crates/csm-rs/**
+              - crates/csm-rs/**'
             manta_ws:
-              crates/manta-ws/**
+              - crates/manta-ws/**
             manta_backend_dispatcher:
-              crates/manta-backend-dispatcher/**
+              - crates/manta-backend-dispatcher/**
             manta:
-              crates/manta/**
+              - crates/manta/**
             ochami_rs:
-              crates/ochami_rs/**
+              - crates/ochami_rs/**
 
       - name: Determine changed crates
         id: set-crates
