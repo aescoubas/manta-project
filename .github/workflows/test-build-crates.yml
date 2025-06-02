@@ -54,24 +54,24 @@ jobs:
         id: set-crates
         run: |
           CHANGED_CRATES=""
-          echo "test variable ${{ steps.changed-files-yaml.outputs.csm_rs_any_changed }}"
-          if [[ "${{ steps.changed-files-yaml.outputs.csm_rs_any_changed }}" == "true" ]]; then
+          echo "test variable ${{ steps.changed-files.outputs.csm_rs_any_changed }}"
+          if [[ "${{ steps.changed-files.outputs.csm_rs_any_changed }}" == "true" ]]; then
               echo "Changed deteched in crates/csm-rs/"
               CHANGED_CRATES="$CHANGED_CRATES csm-rs"
           fi
-          if [[ "${{ steps.changed-files-yaml.outputs.manta_ws_any_changed }}" == "true" ]]; then
+          if [[ "${{ steps.changed-files.outputs.manta_ws_any_changed }}" == "true" ]]; then
               echo "Changed deteched in crates/manta-ws/"
               CHANGED_CRATES="$CHANGED_CRATES manta-ws"
           fi
-          if [[ "${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed }}" == "true" ]]; then
+          if [[ "${{ steps.changed-files.outputs.manta_backend_dispatcher_any_changed }}" == "true" ]]; then
               echo "Changed deteched in crates/manta-backend-dispatcher/"
               CHANGED_CRATES="$CHANGED_CRATES manta-backend-dispatcher"
           fi
-          if [[ "${{ steps.changed-files-yaml.outputs.manta_any_changed }}" == "true" ]]; then
+          if [[ "${{ steps.changed-files.outputs.manta_any_changed }}" == "true" ]]; then
               echo "Changed deteched in crates/manta/"
               CHANGED_CRATES="$CHANGED_CRATES manta"
           fi
-          if [[ "${{ steps.changed-files-yaml.outputs.ochami_rs_any_changed }}" == "true" ]]; then
+          if [[ "${{ steps.changed-files.outputs.ochami_rs_any_changed }}" == "true" ]]; then
               echo "Changed deteched in crates/ochami-rs/"
               CHANGED_CRATES="$CHANGED_CRATES ochami-rs"
           fi
