@@ -34,45 +34,55 @@ jobs:
         with:
           fetch-depth: 0  # Full history for accurate diff
 
-      - name: Get changed files
+      - name: Identify changed files
         id: changed-files
         uses: tj-actions/changed-files@v45
         with:
           files: |
-            crates/**
-            Cargo.toml
-            Cargo.lock
+            csm-rs:
+              - crates/csm-rs/**
+            manta-ws:
+              - crates/manta-ws/**
+            manta-backend-dispatcher:
+              - crates/manta-backend-dispatcher/**
+            manta:
+              - crates/manta/**
+            ochami-rs:
+              - crates/ochami_rs/**
 
-      - name: Determine changed crates
-        id: set-crates
+
+        # translate the above into a single modified crate ?
+        #if: steps.changed-files-yaml.outputs.csm_rs_any_changed == 'true'  
         run: |
-          # Initialize an empty string to store changed crate names
           CHANGED_CRATES=""
-          if [[ "${{ steps.changed-files.outputs.any_changed }}" == "true" ]]; then
-            # List all crates as a space-separated string
-            for crate in csm-rs manta manta-backend-dispatcher manta-ws ochami-rs; do
-              # Check if any file in the crate's directory or workspace files changed
-              if echo "${{ steps.changed-files.outputs.all_changed_files }}" | grep -q -e "^crates/$crate/" -e "^Cargo.toml" -e "^Cargo.lock"; then
-                # Append crate name to the string (space-separated)
-                if [ -z "$CHANGED_CRATES" ]; then
-                  CHANGED_CRATES="$crate"
-                else
-                  CHANGED_CRATES="$CHANGED_CRATES $crate"
-                fi
+          # List all crates as a space-separated string
+          for crate in csm_rs manta manta_backend_dispatcher manta_ws ochami_rs; do
+            # Check if any file in the crate's directory or workspace files changed
+              var_name="${crate}_changed_files"
+              #echo $var_name
+              #echo ${!var_name}
+              if [[ "${!var_name}" == "true" ]]; then
+                  echo "$var_name is true"
+              # Append crate name to the string (space-separated)
+              if [ -z "$CHANGED_CRATES" ]; then
+                  CHANGED_CRATES="$(echo $crate | tr '_' '-')"
+              else
+                CHANGED_CRATES="$CHANGED_CRATES $(echo $crate | tr '_' '-')"
               fi
-            done
-          fi
+            fi
+          done
 
           # Convert space-separated crate names to JSON array
           if [ -z "$CHANGED_CRATES" ]; then
-            echo "crates=[]" >> $GITHUB_OUTPUT
+          echo "crates=[]" >> $GITHUB_OUTPUT
+          #echo "crates=[]" 
           else
-            # Convert space-separated string to JSON array using jq
-            CRATES_JSON=$(echo "$CHANGED_CRATES" | tr ' ' '\n' | jq -R . | jq -s .)
-            echo "crates=$CRATES_JSON" >> $GITHUB_OUTPUT
+          # Convert space-separated string to JSON array using jq
+          CRATES_JSON=$(echo "$CHANGED_CRATES" | tr ' ' '\n' | jq -R . | jq -s .)
+          echo "crates=$CRATES_JSON" >> $GITHUB_OUTPUT
+          #echo "crates=$CRATES_JSON"
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
   test-and-build:
     runs-on: ubuntu-latest
