@@ -54,7 +54,7 @@ jobs:
         id: set-crates
         run: |
           CHANGED_CRATES=""
-
+          echo "test variable ${{ steps.changed-files-yaml.outputs.csm_rs_any_changed }}"
           if [[ "${{ steps.changed-files-yaml.outputs.csm_rs_any_changed }}" == "true" ]]; then
               echo "Changed deteched in crates/csm-rs/"
               CHANGED_CRATES="$CHANGED_CRATES csm-rs"
