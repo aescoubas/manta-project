@@ -32,5 +32,12 @@ pub trait PCSTrait {
     _nodes: &[String],
     _power_status_filter: Option<&str>,
     _management_state_filter: Option<&str>,
-  ) -> impl std::future::Future<Output = Result<PowerStatusAll, Error>> + Send; // TODO: this should return PowerStatusAll instead
+  ) -> impl std::future::Future<Output = Result<PowerStatusAll, Error>> + Send
+  {
+    async {
+      Err(Error::Message(
+        "Power status command not implemented for this backend".to_string(),
+      ))
+    }
+  }
 }
