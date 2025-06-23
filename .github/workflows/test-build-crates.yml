@@ -85,22 +85,23 @@ jobs:
       # Build crate if changed
       - name: Test ${{ matrix.crate.name }}
         #if: needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] == 'true'
-        if: format('needs.changed_files.outputs[{0}_any_changed]', matrix.crate.output_prefix) == 'true'
+        if: format('needs.changed_files.steps.changed-files-yaml.outputs.{0}_any_changed', matrix.crate.output_prefix) == 'true'
+          #if: steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed == 'true'
         run: |
           echo "File changed in ${{ matrix.crate.path }}/"
           cargo test ${{ matrix.crate.name }}
 
-      # Build crate if changed
-      - name: Build ${{ matrix.crate.name }}
-        #if: needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] == 'true'
-        if: format('needs.changed_files.outputs[{0}_any_changed]', matrix.crate.output_prefix) == 'true'
-        env:
-          #ALL_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_all_changed_files] }}
-          ALL_CHANGED_FILES: ${{ format('needs.changed_files.outputs[{0}_all_changed_files]', matrix.crate.output_prefix) }}
-            #ANY_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] }}
-          ANY_CHANGED_FILES: ${{ format('needs.changed_files.outputs[{0}_any_changed]', matrix.crate.output_prefix) }}
-        run: |
-          echo "File changed in ${{ matrix.crate.path }}/"
-          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-          cargo build ${{ matrix.crate.name }}
+          #      # Build crate if changed
+          #      - name: Build ${{ matrix.crate.name }}
+          #        #if: needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] == 'true'
+          #        if: format('needs.changed_files.outputs.[{0}_any_changed]', matrix.crate.output_prefix) == 'true'
+          #        env:
+          #          #ALL_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_all_changed_files] }}
+          #          ALL_CHANGED_FILES: ${{ format('needs.changed_files.outputs[{0}_all_changed_files]', matrix.crate.output_prefix) }}
+          #            #ANY_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] }}
+          #          ANY_CHANGED_FILES: ${{ format('needs.changed_files.outputs[{0}_any_changed]', matrix.crate.output_prefix) }}
+          #        run: |
+          #          echo "File changed in ${{ matrix.crate.path }}/"
+          #          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
+          #          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
+          #          cargo build ${{ matrix.crate.name }}
