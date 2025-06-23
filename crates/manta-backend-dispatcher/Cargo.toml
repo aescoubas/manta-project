@@ -27,3 +27,6 @@ chrono = { version = "0.4.41", default-features = false }
 [profile.dist]
 inherits = "release"
 lto = "thin"
+
+
+

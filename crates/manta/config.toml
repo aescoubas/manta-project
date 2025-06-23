@@ -56,3 +56,7 @@ role_id = "b15517de-cabb-06ba-af98-633d216c6d99" # vault in hashicorp-vault.cscs
 [auditor.kafka]
 brokers = ["kafka.o11y.cscs.ch:9095"]
 topic = "test-topic"
+
+
+
+
