@@ -53,10 +53,10 @@ jobs:
           echo MANTA CHANGED ${MANTA_CHANGED}
 
       - name: Build manta
-        #if: steps.changed-files-yaml.outputs.manta_any_changed == 'true'
+        if: steps.changed-files-yaml.outputs.manta_any_changed == 'true'
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_all_changed_files }}
-          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_any_changed_files }}
+          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_any_changed }}
         run: | 
           echo "File changed in crates/manta/"
           echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
