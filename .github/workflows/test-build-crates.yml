@@ -19,6 +19,17 @@ jobs:
   changed_files:
     runs-on: ubuntu-latest
     name: Test changed-files
+    outputs:
+      manta_any_changed: ${{ steps.changed-files-yaml.outputs.manta_any_changed }}
+      manta_all_changed_files: ${{ steps.changed-files-yaml.outputs.manta_all_changed_files }}
+      manta_backend_dispatcher_any_changed: ${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed }}
+      manta_backend_dispatcher_all_changed_files: ${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_all_changed_files }}
+      manta_ws_any_changed: ${{ steps.changed-files-yaml.outputs.manta_ws_any_changed }}
+      manta_ws_all_changed_files: ${{ steps.changed-files-yaml.outputs.manta_ws_all_changed_files }}
+      ochami_rs_any_changed: ${{ steps.changed-files-yaml.outputs.ochami_rs_any_changed }}
+      ochami_rs_all_changed_files: ${{ steps.changed-files-yaml.outputs.ochami_rs_all_changed_files }}
+      csm_rs_any_changed: ${{ steps.changed-files-yaml.outputs.csm_rs_any_changed }}
+      csm_rs_all_changed_files: ${{ steps.changed-files-yaml.outputs.csm_rs_all_changed_files }}
     steps:
       - uses: actions/checkout@v4
 
