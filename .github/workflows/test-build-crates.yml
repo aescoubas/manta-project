@@ -50,7 +50,7 @@ jobs:
           for file in ${ALL_CHANGED_FILES}; do
             echo "$file was changed"
           done
-          echo MANTA CHANGED-> ${MANTA_CHANGED}
+          echo MANTA CHANGED ${MANTA_CHANGED}
 
       - name: Build manta
         if: steps.changed-files-yaml.outputs.manta_any_changed == 'true'  
