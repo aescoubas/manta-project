@@ -43,7 +43,6 @@ jobs:
 
                       
       - name: Run step if doc file(s) change
-        #if: steps.changed-files-yaml.outputs.doc_any_changed == 'true'
         env:
           DOC_ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.all_changed_files }}
         run: |
@@ -87,13 +86,13 @@ jobs:
           #
 
 
-      - name: List all changed files
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: |
-          for file in ${ALL_CHANGED_FILES}; do
-            echo "$file was changed"
-          done
+            #      - name: List all changed files
+            #        env:
+            #          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+            #        run: |
+            #          for file in ${ALL_CHANGED_FILES}; do
+            #            echo "$file was changed"
+            #          done
 
 
 #name: Test and Build Crates
