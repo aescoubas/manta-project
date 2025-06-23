@@ -91,23 +91,33 @@ jobs:
       - uses: actions/checkout@v4
 
       # Set up Rust toolchain
-      #      - name: Install Rust
-      #        uses: dtolnay/rust-toolchain@stable
-      #        with:
-      #          toolchain: stable
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
 
       # Cache Rust dependencies
       #- name: Cache cargo
       #  uses: Swatinem/rust-cache@v2
 
+      - name: Test ${{ matrix.crate.name }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        run: |
+          cargo test ${{ matrix.crate.name }}
       # Build crate if changed
       - name: Build ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-        env:
-          DEBUG: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] }}
-          DEBUG_FORMAT: needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)]
         run: |
-          echo "DEBUG: ${DEBUG}"
-          echo "DEBUG_FORMAT: ${DEBUG_FORMAT}"
+          echo "cargo build --release --package ${{ matrix.crate.name }}"
 
-          #cargo build --release --package ${{ matrix.crate.name }}
+
+#      # Build crate if changed
+#      - name: Build ${{ matrix.crate.name }}
+#        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+#          #env:
+#          #  DEBUG: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] }}
+#          #  DEBUG_FORMAT: needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)]
+#        run: |
+#          #echo "DEBUG: ${DEBUG}"
+#          #echo "DEBUG_FORMAT: ${DEBUG_FORMAT}"
+#          echo "cargo build --release --package ${{ matrix.crate.name }}"
