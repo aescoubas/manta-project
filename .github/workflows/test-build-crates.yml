@@ -78,9 +78,18 @@ jobs:
         with:
           toolchain: stable
 
-      # Cache Rust dependencies
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
+            ## Cache Rust dependencies
+            #- name: Cache cargo
+            #  uses: Swatinem/rust-cache@v2
+
+      # Build crate if changed
+      - name: Test ${{ matrix.crate.name }}
+        #if: needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] == 'true'
+        if: format('needs.changed_files.outputs[{0}_any_changed]', matrix.crate.output_prefix) == 'true'
+        env:
+        run: |
+          echo "File changed in ${{ matrix.crate.path }}/"
+          cargo test ${{ matrix.crate.name }}
 
       # Build crate if changed
       - name: Build ${{ matrix.crate.name }}
@@ -95,4 +104,4 @@ jobs:
           echo "File changed in ${{ matrix.crate.path }}/"
           echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
           echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-          cargo build --release --package ${{ matrix.crate.name }}
+          cargo build ${{ matrix.crate.name }}
