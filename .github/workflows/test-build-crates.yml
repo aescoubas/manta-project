@@ -83,5 +83,20 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: debug
+        env:
+          ALL_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_all_changed_files] }}
+          ANY_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] }}
         run: |
           echo "File changed in ${{ matrix.crate.path }}/"
+
+          #      # Build crate if changed
+          #      - name: Build ${{ matrix.crate.name }}
+          #        if: needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] == 'true'
+          #        env:
+          #          ALL_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_all_changed_files] }}
+          #          ANY_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] }}
+          #        run: |
+          #          echo "File changed in ${{ matrix.crate.path }}/"
+          #          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
+          #          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
+          #          cargo build --release --package ${{ matrix.crate.name }}
