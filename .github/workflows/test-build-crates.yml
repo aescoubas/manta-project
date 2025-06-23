@@ -85,7 +85,7 @@ jobs:
       - name: DEBUG ${{ matrix.crate.name }}
         #if: needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] == 'true'
         env: 
-          TEST: ${{ format('needs.changed_files.outputs[{0}_any_changed]', matrix.crate.output_prefix) }}
+          TEST: ${{ format('needs.changed_files.steps.changed-files-yaml.outputs.{0}_any_changed', matrix.crate.output_prefix) }}
         run: |
           echo ${{matrix.crate.name}}
           echo ${TEST}
