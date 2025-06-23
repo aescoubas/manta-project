@@ -1,20 +1,20 @@
 name: Test and Build Crates
 
-on:
-  push:
-    branches:
-      - '**'  # Run on all branches
-    paths:
-      - 'crates/**'  # Trigger on changes in crates directory
-      - 'Cargo.toml'  # Trigger on workspace Cargo.toml changes
-      - 'Cargo.lock'  # Trigger on lockfile changes
-  pull_request:
-    branches:
-      - '**'
-    paths:
-      - 'crates/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
+  #on:
+  #  push:
+  #    branches:
+  #      - '**'  # Run on all branches
+  #    paths:
+  #      - 'crates/**'  # Trigger on changes in crates directory
+  #      - 'Cargo.toml'  # Trigger on workspace Cargo.toml changes
+  #      - 'Cargo.lock'  # Trigger on lockfile changes
+  #  pull_request:
+  #    branches:
+  #      - '**'
+  #    paths:
+  #      - 'crates/**'
+  #      - 'Cargo.toml'
+  #      - 'Cargo.lock'
 
 permissions:
   contents: read  # Required for checking out code
