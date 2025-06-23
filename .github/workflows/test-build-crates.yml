@@ -94,7 +94,9 @@ jobs:
         #if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         env:
           DEBUG: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] }}
+          DEBUG_FORMAT: needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)]
         run: |
           echo "DEBUG: ${DEBUG}"
+          echo "DEBUG_FORMAT: ${DEBUG_FORMAT}"
 
           #cargo build --release --package ${{ matrix.crate.name }}
