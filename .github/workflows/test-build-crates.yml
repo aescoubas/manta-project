@@ -25,74 +25,65 @@ jobs:
       # Example 1
       # -----------------------------------------------------------------------------------------------------------
       - name: Get changed files
-        id: changed-files-yaml
+        id: changed-files
         uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
         # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
         with:
-          files_yaml: |
+          file_yaml: |
             manta:
-              - crates/manta/**
+              - 'crates/manta/**'
             manta_backend_dispatcher:
-              - crates/manta-backend-dispatcher/**
+              - 'crates/manta-backend-dispatcher/**'
             manta_ws:
-              - crates/manta-ws/**
+              - 'crates/manta-ws/**'
             ochami_rs:
-              - crates/ochami-rs/**
+              - 'crates/ochami-rs/**'
             csm_rs:
-              - crates/csm-rs/**
+              - 'crates/csm-rs/**'
 
-                      
-      - name: Run step if doc file(s) change
+        #   since_last_remote_commit: true 
+      - name: List all changed files
         env:
-          DOC_ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.all_changed_files }}
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
         run: |
-          echo "One or more doc file(s) has changed."
-          echo "List all the files that have changed: $DOC_ALL_CHANGED_FILES"
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
+
+      - name: Build manta
+        if: steps.changed-files.outputs.manta_any_changed == 'true'  
+        run: | 
+          echo "File changed in crates/manta/"
+
+      - name: Build manta-backend-disptcher
+        if: steps.changed-files.outputs.manta_backend_dispatcher_any_changed == 'true'  
+        run: | 
+          echo "File changed in crates/manta-backend-dispatcher/"
+
+      - name: Build manta-ws
+        if: steps.changed-files.outputs.manta_ws_any_changed == 'true'  
+        run: | 
+          echo "File changed in crates/manta-ws/"
+
+      - name: Build ochami-rs
+        if: steps.changed-files.outputs.ochami_rs_any_changed == 'true'  
+        run: | 
+          echo "File changed in crates/ochami-rs/"
+
+      - name: Build csm-rs
+        if: steps.changed-files.outputs.csm_rs_any_changed == 'true'  
+        run: | 
+          echo "File changed in crates/csm-rs/"
 
 
-            #        #   since_last_remote_commit: true 
-            #      - name: List all changed files
-            #        env:
-            #          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-            #        run: |
-            #          for file in ${ALL_CHANGED_FILES}; do
-            #            echo "$file was changed"
-            #          done
 
-          #      - name: Build manta
-          #        if: steps.changed-files.outputs.manta_any_changed == 'true'  
-          #        run: | 
-          #          echo "File changed in crates/manta/"
-          #
-          #      - name: Build manta-backend-disptcher
-          #        if: steps.changed-files.outputs.manta_backend_dispatcher_any_changed == 'true'  
-          #        run: | 
-          #          echo "File changed in crates/manta-backend-dispatcher/"
-          #
-          #      - name: Build manta-ws
-          #        if: steps.changed-files.outputs.manta_ws_any_changed == 'true'  
-          #        run: | 
-          #          echo "File changed in crates/manta-ws/"
-          #
-          #      - name: Build ochami-rs
-          #        if: steps.changed-files.outputs.ochami_rs_any_changed == 'true'  
-          #        run: | 
-          #          echo "File changed in crates/ochami-rs/"
-          #
-          #      - name: Build csm-rs
-          #        if: steps.changed-files.outputs.csm_rs_any_changed == 'true'  
-          #        run: | 
-          #          echo "File changed in crates/csm-rs/"
-          #
-
-
-            #      - name: List all changed files
-            #        env:
-            #          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-            #        run: |
-            #          for file in ${ALL_CHANGED_FILES}; do
-            #            echo "$file was changed"
-            #          done
+      - name: List all changed files
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in ${ALL_CHANGED_FILES}; do
+            echo "$file was changed"
+          done
 
 
 #name: Test and Build Crates
