@@ -62,55 +62,48 @@ jobs:
           echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
           echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
 
-          #      - name: Build manta-backend-disptcher
-          #        #if: steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed == 'true'  
-          #        env:
-          #          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_all_changed_files }}
-          #          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed_files }}
-          #        run: | 
-          #          echo "File changed in crates/manta-backend-dispatcher/"
-          #          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          #          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-          #
-          #      - name: Build manta-ws
-          #        #if: steps.changed-files-yaml.outputs.manta_ws_any_changed == 'true'  
-          #        env:
-          #          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_ws_all_changed_files }}
-          #          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_ws_any_changed_files }}
-          #        run: | 
-          #          echo "File changed in crates/manta-ws/"
-          #          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          #          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-          #
-          #      - name: Build ochami-rs
-          #        #if: steps.changed-files-yaml.outputs.ochami_rs_any_changed == 'true'  
-          #        env:
-          #          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.ochami_rs_all_changed_files }}
-          #          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.ochami_rs_any_changed_files }}
-          #        run: | 
-          #          echo "File changed in crates/ochami-rs/"
-          #          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          #          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-          #
-          #      - name: Build csm-rs
-          #        #if: steps.changed-files-yaml.outputs.csm_rs_any_changed == 'true'  
-          #        env:
-          #          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.csm_rs_all_changed_files }}
-          #          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.csm_rs_any_changed_files }}
-          #        run: | 
-          #          echo "File changed in crates/csm-rs/"
-          #          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          #          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-
-
-
-      - name: List all changed files
+      - name: Build manta-backend-dispatcher
+        if: steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed == 'true'
         env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-        run: |
-          for file in ${ALL_CHANGED_FILES}; do
-            echo "$file was changed"
-          done
+          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_all_changed_files }}
+          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed }}
+        run: | 
+          echo "File changed in crates/manta-backend-dispatcher/"
+          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
+          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
+
+      - name: Build manta-ws
+        if: steps.changed-files-yaml.outputs.manta_ws_any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_ws_all_changed_files }}
+          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_ws_any_changed }}
+        run: | 
+          echo "File changed in crates/manta-ws/"
+          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
+          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
+
+      - name: Build csm-rs
+        if: steps.changed-files-yaml.outputs.csm_rs_any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.csm_rs_all_changed_files }}
+          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.csm_rs_any_changed }}
+        run: | 
+          echo "File changed in crates/csm-rs/"
+          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
+          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
+
+      - name: Build ochami-rs
+        if: steps.changed-files-yaml.outputs.ochami_rs_any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.ochami_rs_all_changed_files }}
+          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.ochami_rs_any_changed }}
+        run: | 
+          echo "File changed in crates/ochami-rs/"
+          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
+          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
+
+
+
 
 
 #name: Test and Build Crates
