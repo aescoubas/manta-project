@@ -85,7 +85,7 @@ jobs:
       # Build crate if changed
       - name: Test ${{ matrix.crate.name }}
         #if: needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] == 'true'
-        if: format('needs.changed_files.steps.changed-files-yaml.outputs.{0}_any_changed', matrix.crate.output_prefix) == 'true'
+        if: ${{ format('needs.changed_files.steps.changed-files-yaml.outputs.{0}_any_changed', matrix.crate.output_prefix) }} == 'true'
           #if: steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed == 'true'
         run: |
           echo "File changed in ${{ matrix.crate.path }}/"
