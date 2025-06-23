@@ -45,7 +45,7 @@ jobs:
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.all_changed_files }}
-          MANTA_CHANGED: ${{ steps.changed-files-yaml.outputs.any_changed }} 
+          MANTA_CHANGED: ${{ steps.changed-files-yaml.outputs.manta_any_changed }}
         run: |
           for file in ${ALL_CHANGED_FILES}; do
             echo "$file was changed"
@@ -53,7 +53,7 @@ jobs:
           echo MANTA CHANGED ${MANTA_CHANGED}
 
       - name: Build manta
-        if: steps.changed-files-yaml.outputs.manta_any_changed == 'true'  
+        if: steps.changed-files-yaml.outputs.manta_any_changed == 'true'
         run: | 
           echo "File changed in crates/manta/"
 
