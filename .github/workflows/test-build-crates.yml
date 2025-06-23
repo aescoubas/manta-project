@@ -29,17 +29,17 @@ jobs:
         uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
         # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
         with:
-          file_yaml: |
+          files_yaml: |
             manta:
-              - 'crates/manta/**'
+              - crates/manta/**
             manta_backend_dispatcher:
-              - 'crates/manta-backend-dispatcher/**'
+              - crates/manta-backend-dispatcher/**
             manta_ws:
-              - 'crates/manta-ws/**'
+              - crates/manta-ws/**
             ochami_rs:
-              - 'crates/ochami-rs/**'
+              - crates/ochami-rs/**
             csm_rs:
-              - 'crates/csm-rs/**'
+              - crates/csm-rs/**
 
         #   since_last_remote_commit: true 
       - name: List all changed files
