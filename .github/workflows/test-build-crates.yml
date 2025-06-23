@@ -39,6 +39,13 @@ jobs:
             csm_rs:
               - crates/csm-rs/**
 
+      # Debug outputs
+      - name: Debug changed files outputs
+        run: |
+          echo "manta_all_changed_files: ${{ steps.changed-files-yaml.outputs.manta_all_changed_files }}"
+          echo "manta_any_changed: ${{ steps.changed-files-yaml.outputs.manta_any_changed }}"
+          echo "all_changed_files: ${{ steps.changed-files-yaml.outputs.all_changed_files }}"
+
       # List all changed files
       - name: List all changed files
         env:
@@ -79,8 +86,8 @@ jobs:
           toolchain: stable
 
       # Cache Rust dependencies
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
+      #- name: Cache cargo
+      #  uses: Swatinem/rust-cache@v2
 
       # Build crate if changed
       - name: Build ${{ matrix.crate.name }}
