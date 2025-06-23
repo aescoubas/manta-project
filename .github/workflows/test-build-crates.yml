@@ -31,15 +31,15 @@ jobs:
         with:
           files_yaml: |
             manta:
-              - 'crates/manta/**'
+              - crates/manta/**
             manta_backend_dispatcher:
-              - 'crates/manta-backend-dispatcher/**'
+              - crates/manta-backend-dispatcher/**
             manta_ws:
-              - 'crates/manta-ws/**'
+              - crates/manta-ws/**
             ochami_rs:
-              - 'crates/ochami-rs/**'
+              - crates/ochami-rs/**
             csm_rs:
-              - 'crates/csm-rs/**'
+              - crates/csm-rs/**
 
                       
       - name: Run step if doc file(s) change
