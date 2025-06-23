@@ -103,13 +103,13 @@ jobs:
       - name: Test ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          cargo test --package ${{ matrix.crate.name }}
+          cargo test --package crates/${{ matrix.crate.name }}
 
       # Build crate if changed
       - name: Build ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          echo "cargo build --release --package ${{ matrix.crate.name }}"
+          echo "cargo build --release --package crates/${{ matrix.crate.name }}"
 
 
 #      # Build crate if changed
