@@ -3,6 +3,16 @@ on:
   push:
     branches:
       - '**'  # Run on all branches
+    paths:
+      - 'crates/**'   # Trigger on changes in crates directory
+      - 'Cargo.toml'  # Trigger on workspace Cargo.toml changes
+      - 'Cargo.lock'  # Trigger on lockfile changes
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'crates/**'
+      - 'Cargo.toml'
 
 jobs:
   changed_files:
