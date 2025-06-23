@@ -103,7 +103,8 @@ jobs:
       - name: Test ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          cargo test ${{ matrix.crate.name }}
+          cargo test --package ${{ matrix.crate.name }}
+
       # Build crate if changed
       - name: Build ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
