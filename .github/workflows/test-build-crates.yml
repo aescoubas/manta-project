@@ -31,15 +31,15 @@ jobs:
         with:
           file_yaml: |
             manta:
-              - 'crates/manta/**'
+              - crates/manta/**
             manta_backend_dispatcher:
-              - 'crates/manta-backend-dispatcher/**'
+              - crates/manta-backend-dispatcher/**
             manta_ws:
-              - 'crates/manta-ws/**'
+              - crates/manta-ws/**
             ochami_rs:
-              - 'crates/ochami-rs/**'
+              - crates/ochami-rs/**
             csm_rs:
-              - 'crates/csm-rs/**'
+              - crates/csm-rs/**
 
         #   since_last_remote_commit: true 
       - name: List all changed files
