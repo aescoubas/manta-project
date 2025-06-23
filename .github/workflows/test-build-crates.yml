@@ -87,6 +87,7 @@ jobs:
           ALL_CHANGED_FILES: ${{ needs.changed_files.outputs }}
           ANY_CHANGED_FILES: ${{ needs.changed_files.outputs }}
         run: |
+          env
           echo "File changed in ${{ matrix.crate.path }}/"
           echo "${ALL_CHANGED_FILES}"
 
