@@ -1,4 +1,5 @@
 name: Check changed files
+
 on:
   push:
     branches:
@@ -16,18 +17,15 @@ on:
 
 jobs:
   changed_files:
-    runs-on: ubuntu-latest  # windows-latest || macos-latest
+    runs-on: ubuntu-latest
     name: Test changed-files
     steps:
       - uses: actions/checkout@v4
 
-      # -----------------------------------------------------------------------------------------------------------
-      # Example 1
-      # -----------------------------------------------------------------------------------------------------------
+      # Get changed files
       - name: Get changed files
         id: changed-files-yaml
         uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
-        # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
         with:
           files_yaml: |
             manta:
@@ -41,236 +39,58 @@ jobs:
             csm_rs:
               - crates/csm-rs/**
 
-        #   since_last_remote_commit: true 
+      # List all changed files
       - name: List all changed files
         env:
           ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.all_changed_files }}
-          MANTA_CHANGED: ${{ steps.changed-files-yaml.outputs.manta_any_changed }}
         run: |
           for file in ${ALL_CHANGED_FILES}; do
             echo "$file was changed"
           done
-          echo MANTA CHANGED ${MANTA_CHANGED}
 
-      - name: Build manta
-        if: steps.changed-files-yaml.outputs.manta_any_changed == 'true'
+  build_crates:
+    needs: changed_files
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crate:
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+          - name: manta-backend-dispatcher
+            path: crates/manta-backend-dispatcher
+            output_prefix: manta_backend_dispatcher
+          - name: manta-ws
+            path: crates/manta-ws
+            output_prefix: manta_ws
+          - name: ochami-rs
+            path: crates/ochami-rs
+            output_prefix: ochami_rs
+          - name: csm-rs
+            path: crates/csm-rs
+            output_prefix: csm_rs
+    steps:
+      - uses: actions/checkout@v4
+
+      # Set up Rust toolchain
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+            #
+            #      # Cache Rust dependencies
+            #      - name: Cache cargo
+            #        uses: Swatinem/rust-cache@v2
+            #
+      # Build crate if changed
+      - name: Build ${{ matrix.crate.name }}
+        if: needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] == 'true'
         env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_all_changed_files }}
-          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_any_changed }}
-        run: | 
-          echo "File changed in crates/manta/"
+          ALL_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_all_changed_files] }}
+          ANY_CHANGED_FILES: ${{ needs.changed_files.outputs[${{ matrix.crate.output_prefix }}_any_changed] }}
+        run: |
+          echo "File changed in ${{ matrix.crate.path }}/"
           echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
           echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-
-      - name: Build manta-backend-dispatcher
-        if: steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed == 'true'
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_all_changed_files }}
-          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_backend_dispatcher_any_changed }}
-        run: | 
-          echo "File changed in crates/manta-backend-dispatcher/"
-          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-
-      - name: Build manta-ws
-        if: steps.changed-files-yaml.outputs.manta_ws_any_changed == 'true'
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_ws_all_changed_files }}
-          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.manta_ws_any_changed }}
-        run: | 
-          echo "File changed in crates/manta-ws/"
-          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-
-      - name: Build csm-rs
-        if: steps.changed-files-yaml.outputs.csm_rs_any_changed == 'true'
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.csm_rs_all_changed_files }}
-          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.csm_rs_any_changed }}
-        run: | 
-          echo "File changed in crates/csm-rs/"
-          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-
-      - name: Build ochami-rs
-        if: steps.changed-files-yaml.outputs.ochami_rs_any_changed == 'true'
-        env:
-          ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.ochami_rs_all_changed_files }}
-          ANY_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.ochami_rs_any_changed }}
-        run: | 
-          echo "File changed in crates/ochami-rs/"
-          echo ALL_CHANGED_FILES ${ALL_CHANGED_FILES}
-          echo ANY_CHANGED_FILES ${ANY_CHANGED_FILES}
-
-
-
-
-
-#name: Test and Build Crates
-#
-#on:
-#  push:
-#    branches:
-#      - '**'  # Run on all branches
-#        #    paths:
-#        #      - 'crates/**'  # Trigger on changes in crates directory
-#        #      - 'Cargo.toml'  # Trigger on workspace Cargo.toml changes
-#        #      - 'Cargo.lock'  # Trigger on lockfile changes
-#        #  pull_request:
-#        #    branches:
-#        #      - '**'
-#        #    paths:
-#        #      - 'crates/**'
-#        #      - 'Cargo.toml'
-#        #- 'Cargo.lock'
-#
-#permissions:
-#  contents: read  # Required for checking out code
-#  pull-requests: write  # Optional, for commenting on PRs if needed
-#
-#env:
-#  CARGO_TERM_COLOR: always  # Enable colored output for Cargo
-#
-#jobs:
-#  detect-changed-crates:
-#    runs-on: ubuntu-latest
-#    outputs:
-#      crates: ${{ steps.set-crates.outputs.crates }}
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0  # Full history for accurate diff
-#      - name: Get changed files
-#        id: changed-files-print
-#        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
-#        with:
-#          since_last_remote_commit: true 
-#        # To compare changes between the current commit and the last pushed remote commit set `since_last_remote_commit: true`. e.g
-#
-#      - name: List all changed files
-#        env:
-#          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-#        run: |
-#          for file in ${ALL_CHANGED_FILES}; do
-#            echo "$file was changed"
-#          done
-#
-#
-#      - name: Identify changed files
-#        id: changed-files
-#        uses: tj-actions/changed-files@v46
-#        with:
-#          files: |
-#            csm_rs:
-#              - crates/csm-rs/**
-#            manta_ws:
-#              - crates/manta-ws/**
-#            manta_backend_dispatcher:
-#              - crates/manta-backend-dispatcher/**
-#            manta:
-#              - crates/manta/**
-#            ochami_rs:
-#              - crates/ochami_rs/**
-#
-#      - name: Determine changed crates
-#        id: set-crates
-#        env: 
-#          ALL_CHANGED_FILES: ${{ steps.changed-files.outputs.all_changed_files }}
-#          csm_rs_any_changed: ${{ steps.changed-files.outputs.csm_rs_any_changed }}
-#          manta_ws_any_changed: ${{ steps.changed-files.outputs.manta_ws_any_changed }}
-#          manta_backend_dispatcher_any_changed: ${{ steps.changed-files.outputs.manta_backend_dispatcher_any_changed }}
-#          manta_any_changed: ${{ steps.changed-files.outputs.manta_any_changed }}
-#          ochami_rs_any_changed: ${{ steps.changed-files.outputs.ochami_rs_any_changed }}
-#
-#        run: |
-#          env
-#          #set | grep -E '^[^ ]+='
-#          CHANGED_CRATES=""
-#            for crate in csm_rs manta manta_backend_dispatcher manta_ws ochami_rs; do
-#            # check if any file in the crate's directory or workspace files changed
-#                var_name="${crate}_any_changed"
-#                #echo $var_name
-#                #echo ${!var_name}
-#                if [[ "${!var_name}" == "true" ]]; then
-#                    echo "$var_name is true"
-#                # append crate name to the string (space-separated)
-#                if [ -z "$changed_crates" ]; then
-#                    changed_crates="$(echo $crate | tr '_' '-')"
-#                else
-#                  changed_crates="$changed_crates $(echo $crate | tr '_' '-')"
-#                fi
-#              fi
-#          done
-#
-#          #echo "test variable ${{ steps.changed-files.outputs.csm_rs_any_changed }}"
-#
-#          #if [[ "${{ steps.changed-files.outputs.csm_rs_any_changed }}" == "true" ]]; then
-#          #    echo "Changed deteched in crates/csm-rs/"
-#          #    CHANGED_CRATES="$CHANGED_CRATES csm-rs"
-#          #fi
-#          #if [[ "${{ steps.changed-files.outputs.manta_ws_any_changed }}" == "true" ]]; then
-#          #    echo "Changed deteched in crates/manta-ws/"
-#          #    CHANGED_CRATES="$CHANGED_CRATES manta-ws"
-#          #fi
-#          #if [[ "${{ steps.changed-files.outputs.manta_backend_dispatcher_any_changed }}" == "true" ]]; then
-#          #    echo "Changed deteched in crates/manta-backend-dispatcher/"
-#          #    CHANGED_CRATES="$CHANGED_CRATES manta-backend-dispatcher"
-#          #fi
-#          #if [[ "${{ steps.changed-files.outputs.manta_any_changed }}" == "true" ]]; then
-#          #    echo "Changed deteched in crates/manta/"
-#          #    CHANGED_CRATES="$CHANGED_CRATES manta"
-#          #fi
-#          #if [[ "${{ steps.changed-files.outputs.ochami_rs_any_changed }}" == "true" ]]; then
-#          #    echo "Changed deteched in crates/ochami-rs/"
-#          #    CHANGED_CRATES="$CHANGED_CRATES ochami-rs"
-#          #fi
-#          #  
-#          ## Convert space-separated crate names to JSON array
-#          #if [ -z "$CHANGED_CRATES" ]; then
-#          #  echo "crates=[]" 
-#          #  echo "crates=[]" >> $GITHUB_OUTPUT
-#          #else
-#          #  # Convert space-separated string to JSON array using jq
-#          #  CRATES_JSON=$(echo "$CHANGED_CRATES" | tr ' ' '\n' | jq -R . | jq -s .)
-#          #  echo "crates=$CRATES_JSON"
-#          #  echo "crates=$CRATES_JSON" >> $GITHUB_OUTPUT
-#          #fi
-#
-#  test-and-build:
-#    runs-on: ubuntu-latest
-#    needs: detect-changed-crates
-#    if: needs.detect-changed-crates.outputs.crates != '[]'  # Only run if crates changed
-#    strategy:
-#      matrix:
-#        crate: ${{ fromJson(needs.detect-changed-crates.outputs.crates) }}
-#      fail-fast: false  # Continue testing other crates if one fails
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Setup Rust
-#        uses: dtolnay/rust-toolchain@stable
-#        with:
-#          toolchain: stable
-#
-#      - name: Cache Rust dependencies
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            ~/.cargo/registry
-#            ~/.cargo/git
-#            target
-#          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
-#          restore-keys: |
-#            ${{ runner.os }}-cargo-
-#
-#      - name: Run tests for ${{ matrix.crate }}
-#        run: |
-#          cargo test --package ${{ matrix.crate }} --all-features
-#        working-directory: .
-#
-#      - name: Build crate ${{ matrix.crate }}
-#        run: |
-#          cargo build --package ${{ matrix.crate }} --release
-#        working-directory: .
+          #cargo build --release --package ${{ matrix.crate.name }}
+          cargo build ${{ matrix.crate.name }}
