@@ -102,7 +102,7 @@ jobs:
 
       # Build crate if changed
       - name: Build ${{ matrix.crate.name }}
-        #if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         env:
           DEBUG: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] }}
           DEBUG_FORMAT: needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)]
