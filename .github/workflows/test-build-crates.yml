@@ -88,7 +88,7 @@ jobs:
           #TEST: ${{ format('needs.changed_files.steps.changed-files-yaml.outputs.{0}_any_changed', matrix.crate.output_prefix) }}
           TEST: ${{ format('needs.changed_files.steps.changed-files-yaml.outputs.{0}_any_changed', matrix.crate.output_prefix) }}
           TESTBIS: ${{ needs.changed_files.steps.changed-files-yaml.outputs.manta_any_changed }}
-          TESTBISBIS: ${{ needs.changed_files.outputs[manta_any_changed] }}
+          TESTBISBIS: ${{ needs.changed_files.outputs.manta_any_changed }}
 
         run: |
           echo ${{matrix.crate.name}}
