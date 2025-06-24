@@ -3,17 +3,20 @@ name: Check changed files and release
 on:
   push:
     branches:
-      - '**'  # Run on all branches
-    paths:
-      - 'crates/**'   # Trigger on changes in crates directory
-      - 'Cargo.toml'  # Trigger on workspace Cargo.toml changes
-      - 'Cargo.lock'  # Trigger on lockfile changes
-  pull_request:
-    branches:
-      - '**'
+      - 'staging'
+      - 'main'
     paths:
       - 'crates/**'
       - 'Cargo.toml'
+      - 'Cargo.lock'
+  pull_request:
+    branches:
+      - 'staging'
+      - 'main'
+    paths:
+      - 'crates/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
 
 permissions:
   contents: write  # Required for creating releases
@@ -41,7 +44,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files-yaml
-        uses: tj-actions/changed-files@ed68ef82c095e0d48ec87eccea555d944a631a4c # v46
+        uses: tj-actions/changed-files@v46
         with:
           files_yaml: |
             manta:
@@ -107,7 +110,6 @@ jobs:
 
   build_crates:
     needs: test_crates
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -143,7 +145,7 @@ jobs:
           cd ${{ matrix.crate.path }} && cargo build --release
 
       - name: Upload artifacts
-        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.ref == 'refs/heads/main' }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.crate.name }}-binary
@@ -151,7 +153,7 @@ jobs:
 
   release:
     needs: build_crates
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -162,7 +164,7 @@ jobs:
         id: create_release
         uses: taiki-e/create-gh-release-action@v1
         with:
-          changelog: CHANGELOG.md  # Optional: Ensure this file exists
+          changelog: CHANGELOG.md
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           prerelease: false
