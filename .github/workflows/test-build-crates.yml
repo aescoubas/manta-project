@@ -32,6 +32,8 @@ jobs:
       csm_rs_all_changed_files: ${{ steps.changed-files-yaml.outputs.csm_rs_all_changed_files }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          subdmodules: recursive
 
       # Get changed files
       - name: Get changed files
@@ -89,6 +91,8 @@ jobs:
             output_prefix: csm_rs
     steps:
       - uses: actions/checkout@v4
+        with:
+          subdmodules: recursive
 
       # Set up Rust toolchain
       - name: Install Rust
