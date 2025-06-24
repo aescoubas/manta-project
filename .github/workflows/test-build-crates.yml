@@ -3,7 +3,8 @@ name: Check changed files and release
 on:
   push:
     branches:
-      - '**'  # Run on all branches for push
+      - 'staging'
+      - 'main'
     paths:
       - 'crates/**'
       - 'Cargo.toml'
@@ -109,10 +110,6 @@ jobs:
 
   build_crates:
     needs: test_crates
-    # Run for push to staging/main or pull requests targeting staging/main
-    if: |
-      github.event_name == 'push' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main') ||
-      github.event_name == 'pull_request' && (github.base_ref == 'refs/heads/staging' || github.base_ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     strategy:
       matrix:
