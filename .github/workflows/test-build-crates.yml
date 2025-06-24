@@ -151,8 +151,6 @@ jobs:
           name: ${{ matrix.crate.name }}-binary
           path: ${{ matrix.crate.path }}/target/release/${{ matrix.crate.name }}
 
-  check-tag: 
-  steps:
   # this needs to check if there is a tag on the 
   release:
     needs: build_crates
