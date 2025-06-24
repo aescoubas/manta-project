@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          subdmodules: recursive
+          submodules: recursive
 
       # Get changed files
       - name: Get changed files
@@ -92,7 +92,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          subdmodules: recursive
+          submodules: recursive
 
       # Set up Rust toolchain
       - name: Install Rust
