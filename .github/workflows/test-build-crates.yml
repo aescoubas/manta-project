@@ -5,6 +5,9 @@ on:
     branches:
       - 'staging'
       - 'main'
+    tags:
+      - 'manta-v*'
+      - 'manta-ws-v*'
     paths:
       - 'crates/**'
       - 'Cargo.toml'
@@ -19,7 +22,7 @@ on:
       - 'Cargo.lock'
 
 permissions:
-  contents: write  # Required for creating releases
+  contents: write  # Required for creating releases, committing changes, and pushing tags
 
 jobs:
   changed_files:
@@ -145,44 +148,103 @@ jobs:
           cd ${{ matrix.crate.path }} && cargo build --release
 
       - name: Upload artifacts
-        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.crate.name }}-binary
           path: ${{ matrix.crate.path }}/target/release/${{ matrix.crate.name }}
 
-  # this needs to check if there is a tag on the 
-  release:
-    needs: build_crates
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  cargo-release:
+    needs: [changed_files, build_crates]
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changed_files.outputs.manta_any_changed == 'true' || needs.changed_files.outputs.manta_ws_any_changed == 'true')
+    strategy:
+      matrix:
+        crate:
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            condition: ${{ needs.changed_files.outputs.manta_any_changed == 'true' }}
+          - name: manta-ws
+            path: crates/manta-ws
+            output_prefix: manta_ws
+            condition: ${{ needs.changed_files.outputs.manta_ws_any_changed == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}  # Required for pushing changes
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Install cargo-release
+        if: ${{ matrix.condition }}
+        run: cargo install cargo-release --locked
+
+      - name: Configure git
+        if: ${{ matrix.condition }}
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Run cargo-release for ${{ matrix.crate.name }}
+        if: ${{ matrix.condition }}
+        run: |
+          cd ${{ matrix.crate.path }}
+          cargo release --no-confirm --no-publish --tag-prefix ${{ matrix.crate.name }}-v minor
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: [changed_files, build_crates, cargo-release]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && (startsWith(github.ref, 'refs/tags/manta-v') || startsWith(github.ref, 'refs/tags/manta-ws-v'))
+    strategy:
+      matrix:
+        crate:
+          - name: manta
+            output_prefix: manta
+            artifact_name: manta-binary
+            tag_prefix: manta-v
+          - name: manta-ws
+            output_prefix: manta_ws
+            artifact_name: manta-ws-binary
+            tag_prefix: manta-ws-v
+        include:
+          - crate: manta
+            condition: ${{ startsWith(github.ref, 'refs/tags/manta-v') }}
+          - crate: manta-ws
+            condition: ${{ startsWith(github.ref, 'refs/tags/manta-ws-v') }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: taiki-e/create-gh-release-action@v1
-        with:
-          changelog: CHANGELOG.md
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
-          prerelease: false
-          title: Release ${{ github.sha }}
-          body: |
-            Automated release for commit ${{ github.sha }}.
-            See CHANGELOG.md for details.
-
-      - name: Download artifacts
+      - name: Download artifact for ${{ matrix.crate.name }}
+        if: ${{ matrix.condition }}
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          name: ${{ matrix.crate.artifact_name }}
+          path: artifacts/
 
-      - name: Upload binaries to release
-        run: |
-          for artifact in artifacts/*/*; do
-            gh release upload ${{ steps.create_release.outputs.tag }} "$artifact" --repo ${{ github.repository }}
-          done
+      - name: Create Release for ${{ matrix.crate.name }}
+        if: ${{ matrix.condition }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}  # e.g., manta-v0.1.0
+          name: ${{ matrix.crate.name }} Release ${{ github.ref_name }}
+          body: |
+            Release for ${{ matrix.crate.name }} ${{ github.ref_name }}.
+            Changes in this release:
+            - See commit history or CHANGELOG.md for details.
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/${{ matrix.crate.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
