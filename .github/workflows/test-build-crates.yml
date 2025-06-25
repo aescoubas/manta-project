@@ -78,13 +78,26 @@ jobs:
   debug_job:
     runs-on: ubuntu-latest
     needs: changed_files
+    strategy:
+      matrix:
+        crate:
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            condition: ${{ needs.changed_files.outputs.manta_any_changed == 'true' }}
+          - name: manta-ws
+            path: crates/manta-ws
+            output_prefix: manta_ws
+            condition: ${{ needs.changed_files.outputs.manta_ws_any_changed == 'true' }}
     steps:
       - name: debug
         id: debug
         env: 
           condition: ${{ needs.changed_files.outputs.manta_any_changed }}
+          condition_matrix: ${{ matrix.condition }}
         run: |
           echo ${condition}
+          echo ${condition_matrix}
 
 
 #  test_crates:
