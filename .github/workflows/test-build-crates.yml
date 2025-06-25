@@ -94,7 +94,7 @@ jobs:
         id: debug
         env: 
           condition: ${{ needs.changed_files.outputs.manta_any_changed }}
-          condition_matrix: ${{ matrix.condition }}
+          condition_matrix: ${{ matrix.crate.condition }}
         run: |
           echo ${condition}
           echo ${condition_matrix}
