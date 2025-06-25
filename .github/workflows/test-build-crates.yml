@@ -113,6 +113,7 @@ jobs:
 
   build_crates:
     #needs: test_crates
+    needs: changed_files
     runs-on: ubuntu-latest
     strategy:
       matrix:
