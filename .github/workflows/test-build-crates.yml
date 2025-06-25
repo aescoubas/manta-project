@@ -158,7 +158,7 @@ jobs:
   cargo-release:
     needs: [changed_files, build_crates]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changed_files.outputs.manta_any_changed == 'true' || needs.changed_files.outputs.manta_ws_any_changed == 'true')
+      #if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changed_files.outputs.manta_any_changed == 'true' || needs.changed_files.outputs.manta_ws_any_changed == 'true')
     strategy:
       matrix:
         crate:
