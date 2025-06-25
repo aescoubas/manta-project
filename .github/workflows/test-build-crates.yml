@@ -75,69 +75,7 @@ jobs:
             echo "$file was changed"
           done
 
-#  debug_job:
-#    runs-on: ubuntu-latest
-#    needs: changed_files
-#    strategy:
-#      matrix:
-#        crate:
-#          - name: manta
-#            path: crates/manta
-#            output_prefix: manta
-#            condition: ${{ needs.changed_files.outputs.manta_any_changed == 'true' }}
-#          - name: manta-ws
-#            path: crates/manta-ws
-#            output_prefix: manta_ws
-#            condition: ${{ needs.changed_files.outputs.manta_ws_any_changed == 'true' }}
-#    steps:
-#      - name: debug
-#        id: debug
-#        env: 
-#          condition: ${{ needs.changed_files.outputs.manta_any_changed }}
-#          condition_matrix: ${{ matrix.crate.condition }}
-#        run: |
-#          echo ${condition}
-#          echo ${condition_matrix}
-#
-
-#  test_crates:
-#    needs: changed_files
-#    runs-on: ubuntu-latest
-#    strategy:
-#      matrix:
-#        crate:
-#          - name: manta
-#            path: crates/manta
-#            output_prefix: manta
-#          - name: manta-backend-dispatcher
-#            path: crates/manta-backend-dispatcher
-#            output_prefix: manta_backend_dispatcher
-#          - name: manta-ws
-#            path: crates/manta-ws
-#            output_prefix: manta_ws
-#          - name: ochami-rs
-#            path: crates/ochami-rs
-#            output_prefix: ochami_rs
-#          - name: csm-rs
-#            path: crates/csm-rs
-#            output_prefix: csm_rs
-#    steps:
-#      - uses: actions/checkout@v4
-#        with:
-#          submodules: recursive
-#
-#      - name: Install Rust
-#        uses: dtolnay/rust-toolchain@stable
-#        with:
-#          toolchain: stable
-#
-#      - name: Test ${{ matrix.crate.name }}
-#        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-#        run: |
-#          cd ${{ matrix.crate.path }} && cargo test
-
   build_crates:
-    #needs: test_crates
     needs: changed_files
     runs-on: ubuntu-latest
     strategy:
@@ -180,11 +118,11 @@ jobs:
           name: ${{ matrix.crate.name }}-binary
           path: target/release/${{ matrix.crate.name }}
 
-  # this job only upgrades the patch version
   cargo-release:
     needs: [changed_files, build_crates]
     runs-on: ubuntu-latest
-      #if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.changed_files.outputs.manta_any_changed == 'true' || needs.changed_files.outputs.manta_ws_any_changed == 'true')
+    outputs:
+      tag_name: ${{ steps.set-tag.outputs.tag_name }}
     strategy:
       matrix:
         crate:
@@ -222,27 +160,23 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-#      - name: Run cargo-release for ${{ matrix.crate.name }}
-#        if: ${{ matrix.crate.condition }}
-#        run: |
-#          #cd ${{ matrix.crate.path }}
-#          cargo release -p manta --no-confirm --no-publish --execute --tag-prefix ${{ matrix.crate.name }}-v patch
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#
       - name: Run cargo-release for ${{ matrix.crate.name }}
         if: ${{ matrix.crate.condition }}
+        id: run-release
         run: |
           cd ${{ matrix.crate.path }}
           cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.crate.name }}-v patch
           # Store the tag name
           TAG_NAME=$(git describe --tags --abbrev=0)
-          echo "TAG_NAME ${TAG_NAME}"
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-          echo "GITHUB_ENV:"
-          cat $GITHUB_ENV
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set tag name output
+        id: set-tag
+        run: |
+          # Use the tag from the first matrix job that ran (since only one tag is expected)
+          echo "tag_name=${{ steps.run-release.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
   github-release:
     needs: [changed_files, build_crates, cargo-release]
@@ -264,33 +198,25 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Debug env
-        id: debug-env
-        env: 
-          tag_name: env.TAG_NAME
+      - name: Debug tag name
         run: |
-          echo "------------ ENV -------------"
-          env 
-
-          echo "------------ CAT GITHUB ENV -------------"
-          cat $GITHUB_ENV
-
+          echo "Tag name: ${{ needs.cargo-release.outputs.tag_name }}"
 
       - name: Download artifact for ${{ matrix.crate.name }}
-        if: env.TAG_NAME != '' && startsWith(env.TAG_NAME, matrix.crate.tag_prefix)
+        if: needs.cargo-release.outputs.tag_name != '' && startsWith(needs.cargo-release.outputs.tag_name, matrix.crate.tag_prefix)
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.crate.artifact_name }}
           path: artifacts/
 
       - name: Create Release for ${{ matrix.crate.name }}
-        if: env.TAG_NAME != '' && startsWith(env.TAG_NAME, matrix.crate.tag_prefix)
+        if: needs.cargo-release.outputs.tag_name != '' && startsWith(needs.cargo-release.outputs.tag_name, matrix.crate.tag_prefix)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          name: ${{ matrix.crate.name }} Release ${{ env.TAG_NAME }}
+          tag_name: ${{ needs.cargo-release.outputs.tag_name }}
+          name: ${{ matrix.crate.name }} Release ${{ needs.cargo-release.outputs.tag_name }}
           body: |
-            Release for ${{ matrix.crate.name }} ${{ env.TAG_NAME }}.
+            Release for ${{ matrix.crate.name }} ${{ needs.cargo-release.outputs.tag_name }}.
             Changes in this release:
             - See commit history or CHANGELOG.md for details.
           draft: false
