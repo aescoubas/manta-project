@@ -75,30 +75,30 @@ jobs:
             echo "$file was changed"
           done
 
-  debug_job:
-    runs-on: ubuntu-latest
-    needs: changed_files
-    strategy:
-      matrix:
-        crate:
-          - name: manta
-            path: crates/manta
-            output_prefix: manta
-            condition: ${{ needs.changed_files.outputs.manta_any_changed == 'true' }}
-          - name: manta-ws
-            path: crates/manta-ws
-            output_prefix: manta_ws
-            condition: ${{ needs.changed_files.outputs.manta_ws_any_changed == 'true' }}
-    steps:
-      - name: debug
-        id: debug
-        env: 
-          condition: ${{ needs.changed_files.outputs.manta_any_changed }}
-          condition_matrix: ${{ matrix.crate.condition }}
-        run: |
-          echo ${condition}
-          echo ${condition_matrix}
-
+#  debug_job:
+#    runs-on: ubuntu-latest
+#    needs: changed_files
+#    strategy:
+#      matrix:
+#        crate:
+#          - name: manta
+#            path: crates/manta
+#            output_prefix: manta
+#            condition: ${{ needs.changed_files.outputs.manta_any_changed == 'true' }}
+#          - name: manta-ws
+#            path: crates/manta-ws
+#            output_prefix: manta_ws
+#            condition: ${{ needs.changed_files.outputs.manta_ws_any_changed == 'true' }}
+#    steps:
+#      - name: debug
+#        id: debug
+#        env: 
+#          condition: ${{ needs.changed_files.outputs.manta_any_changed }}
+#          condition_matrix: ${{ matrix.crate.condition }}
+#        run: |
+#          echo ${condition}
+#          echo ${condition_matrix}
+#
 
 #  test_crates:
 #    needs: changed_files
@@ -209,17 +209,17 @@ jobs:
           toolchain: stable
 
       - name: Install cargo-release
-        if: ${{ matrix.condition }}
+        if: ${{ matrix.crate.condition }}
         run: cargo install cargo-release --locked
 
       - name: Configure git
-        if: ${{ matrix.condition }}
+        if: ${{ matrix.crate.condition }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
       - name: Run cargo-release for ${{ matrix.crate.name }}
-        if: ${{ matrix.condition }}
+        if: ${{ matrix.crate.condition }}
         run: |
           #cd ${{ matrix.crate.path }}
           cargo release -p manta --no-confirm --no-publish --tag-prefix ${{ matrix.crate.name }}-v patch
@@ -253,14 +253,14 @@ jobs:
           submodules: recursive
 
       - name: Download artifact for ${{ matrix.crate.name }}
-        if: ${{ matrix.condition }}
+        if: ${{ matrix.crate.condition }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.crate.artifact_name }}
           path: artifacts/
 
       - name: Create Release for ${{ matrix.crate.name }}
-        if: ${{ matrix.condition }}
+        if: ${{ matrix.crate.condition }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}  # e.g., manta-v0.1.0
