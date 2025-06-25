@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.55.3] - 2025-06-25
+## [1.55.4] - 2025-06-25
 
 ### Testing
 
