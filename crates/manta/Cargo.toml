@@ -8,7 +8,7 @@ edition = "2021"
 authors = ["Manuel Sopena Ballesteros <msopena@cscs.ch>", "Miguel Gila <miguel.gila@cscs.ch>"]
 name = "manta"
 description = "Another CLI for ALPS"
-version = "1.54.1-beta.149"
+version = "1.54.1-beta.151"
 license-file = "LICENSE"
 documentation = "https://github.com/eth-cscs/manta/blob/main/README.md"
 homepage = "https://github.com/eth-cscs/manta/blob/main/README.md"
@@ -29,21 +29,20 @@ publish = false # cargo dist --> Avoid publishing to crates.io
 [dependencies]
 # --- START MANTA DEPENDENCIES ---
 
+# PROD
 
-
-#manta-backend-dispatcher = "0.1.78"
-#ochami-rs = "0.1.77"
-
-
-
-
-#csm-rs = "0.5.0-beta.9"
+manta-backend-dispatcher = "0.1.80"
+#manta-backend-dispatcher = { path = "../manta-backend-dispatcher" }
+ochami-rs = "0.1.77"
+#ochami-rs = { path = "../ochami-rs" }
+csm-rs = "0.5.0-beta.9"
+#csm-rs = { path = "../csm-rs" }
 
 # DEV - Only for development purposes
 
-manta-backend-dispatcher = { path = "../manta-backend-dispatcher" }
-ochami-rs = { path = "../ochami-rs" }
-csm-rs = { path = "../csm-rs" }
+# manta-backend-dispatcher = { path = "../manta-backend-dispatcher" }
+# ochami-rs = { path = "../ochami-rs" }
+# csm-rs = { path = "../csm-rs" }
 
 # --- END MANTA DEPENDENCIES ---
 
@@ -62,7 +61,6 @@ tokio = { version = "1.45", features = ["full"] }
 tokio-util = "0.7.4" # used by manta_console to create a read stream from container stdout
 kube = { version = "0.87.2", default-features = false }
 k8s-openapi = "0.20.0"
-
 md5 = { version = "0.7.0", default-features = false }
 uuid = { version = "1.16.0", features = ["fast-rng", "v4"] }
 git2 = { version = "0.18.1", default-features = false, features = ["vendored-openssl"] }

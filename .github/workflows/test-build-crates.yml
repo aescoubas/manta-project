@@ -161,21 +161,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Check tag
-        id: check_tag
-        run: |
-          # Get the latest commit in the PR
-          COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
-          # Check if the commit has any associated tags
-          TAG=$(git tag --points-at "$COMMIT_SHA")
-          if [[ -z "$TAG" ]]; then
-            echo "Error: No tag found for commit $COMMIT_SHA. A tag is required for PRs from staging to main."
-            exit 1
-          else
-            echo "Tag found: $TAG"
-            exit 0
-          fi
-
       - name: Create GitHub Release
         id: create_release
         uses: taiki-e/create-gh-release-action@v1

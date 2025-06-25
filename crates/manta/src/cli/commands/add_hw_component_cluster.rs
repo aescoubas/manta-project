@@ -24,43 +24,37 @@ pub async fn exec(
 ) {
   let pattern = format!("{}:{}", target_hsm_group_name, pattern);
 
-  match backend.get_group(
-        shasta_token,
-        target_hsm_group_name,
-    )
-    .await
-    /* match hsm::group::http_client::get(
-        shasta_token,
-        shasta_base_url,
-        shasta_root_cert,
-        Some(&target_hsm_group_name.to_string()),
-    )
-    .await */
-    {
-        Ok(_) => log::debug!("The HSM group {} exists, good.", target_hsm_group_name),
-        Err(_) => {
-            if create_hsm_group {
-                log::info!("HSM group {} does not exist, but the option to create the group has been selected, creating it now.", target_hsm_group_name.to_string());
-                if dryrun {
-                    log::error!("Dryrun selected, cannot create the new group and continue.");
-                    std::process::exit(1);
-                } else {
-                    let group = Group {
-                        label: target_hsm_group_name.to_string(),
-                        description: None,
-                        tags: None,
-                        members: None,
-                        exclusive_group: Some("false".to_string()),
-                    };
-                    backend.add_group(shasta_token, group).await
-                    .expect("Unable to create new HSM group");
-                }
-            } else {
-                log::error!("HSM group {} does not exist, but the option to create the group was NOT specificied, cannot continue.", target_hsm_group_name.to_string());
-                std::process::exit(1);
-            }
+  match backend.get_group(shasta_token, target_hsm_group_name).await {
+    Ok(_) => {
+      log::debug!("The HSM group {} exists, good.", target_hsm_group_name)
+    }
+    Err(_) => {
+      if create_hsm_group {
+        log::info!("HSM group {} does not exist, but the option to create the group has been selected, creating it now.", target_hsm_group_name.to_string());
+        if dryrun {
+          log::error!(
+            "Dryrun selected, cannot create the new group and continue."
+          );
+          std::process::exit(1);
+        } else {
+          let group = Group {
+            label: target_hsm_group_name.to_string(),
+            description: None,
+            tags: None,
+            members: None,
+            exclusive_group: Some("false".to_string()),
+          };
+          backend
+            .add_group(shasta_token, group)
+            .await
+            .expect("Unable to create new HSM group");
         }
-    };
+      } else {
+        log::error!("HSM group {} does not exist, but the option to create the group was NOT specificied, cannot continue.", target_hsm_group_name.to_string());
+        std::process::exit(1);
+      }
+    }
+  };
 
   log::info!("pattern: {}", pattern);
 
@@ -317,14 +311,6 @@ pub async fn exec(
         .delete_member_from_group(shasta_token, parent_hsm_group_name, &xname)
         .await
         .unwrap();
-      /* let _ = hsm::group::http_client::delete_member(
-          shasta_token,
-          shasta_base_url,
-          shasta_root_cert,
-          parent_hsm_group_name,
-          &xname,
-      )
-      .await; */
 
       let _ = backend
         .add_members_to_group(shasta_token, target_hsm_group_name, vec![&xname])

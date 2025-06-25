@@ -2,15 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.54.1-beta.149] - 2025-06-01
+## [1.54.1-beta.151] - 2025-06-14
+
+### Bug Fixes
+
+- This patch fixes compilation errors because manta-backend-dispatcher did not have a default code in function to get power status
+
+## [1.54.1-beta.150] - 2025-06-07
+
+### Bug Fixes
+
+- Fix missbehaviour managing dryrun flag
+- Remove unwanted exit instruction
 
 ### Miscellaneous Tasks
 
-- Migration to monorepo
+- Release manta version 1.54.1-beta.150
 
 ### Refactor
 
-- Replace argument 'no-dryrun' to 'dry-run' and have all commands following the same behaviour
+- Clean code
+
+## [1.54.1-beta.149] - 2025-06-01
+
+### Features
+
+- Some cli commands had argument --dry-run while other --no-dryrun this was confusing and this patch tries to normalize all commands to use --dry-run
+
+### Miscellaneous Tasks
+
+- Try to build musl binary
+- Release manta version 1.54.1-beta.149
 
 ## [1.54.1-beta.148] - 2025-05-22
 
@@ -5157,6 +5179,10 @@ All notable changes to this project will be documented in this file.
 ### Testing
 
 - Testing git2-rs
+- Testing git2-rs... commit created programatically...
+- Testing git2-rs... commit created programatically...
+- Testing git2-rs... commit created programatically...
+- Testing git2-rs... commit created programatically...
 - Testing git2-rs... commit created programatically...
 - Testing git2-rs... commit created programatically...
 - Testing git2-rs... commit created programatically...
