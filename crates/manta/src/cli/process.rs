@@ -2066,18 +2066,18 @@ pub async fn process_cli(
         backend.delete_node(&shasta_token, id).await?;
 
         println!("Node '{}' deleted", id);
-      } else if let Some(cli_delete_hw_component) =
-        cli_delete.subcommand_matches("component")
+      } else if let Some(cli_delete_hw_configuration) =
+        cli_delete.subcommand_matches("hardware")
       {
         let shasta_token = backend.get_api_token(&site_name).await?;
 
-        let dryrun = cli_delete_hw_component.get_flag("dry-run");
+        let dryrun = cli_delete_hw_configuration.get_flag("dry-run");
 
         let delete_hsm_group =
-          cli_delete_hw_component.get_flag("delete-hsm-group");
+          cli_delete_hw_configuration.get_flag("delete-hsm-group");
 
         let target_hsm_group_name_arg_opt =
-          cli_delete_hw_component.get_one::<String>("target-cluster");
+          cli_delete_hw_configuration.get_one::<String>("target-cluster");
 
         let target_hsm_group_vec = get_groups_available(
           &backend,
@@ -2091,7 +2091,7 @@ pub async fn process_cli(
         //     cli_remove_hw_configuration.get_one::<String>("PARENT_CLUSTER_NAME");
 
         let parent_hsm_group_name_arg_opt =
-          cli_delete_hw_component.get_one::<String>("parent-cluster");
+          cli_delete_hw_configuration.get_one::<String>("parent-cluster");
 
         let parent_hsm_group_vec = get_groups_available(
           &backend,
@@ -2106,7 +2106,7 @@ pub async fn process_cli(
           &shasta_token,
           target_hsm_group_vec.first().unwrap(),
           parent_hsm_group_vec.first().unwrap(),
-          cli_delete_hw_component
+          cli_delete_hw_configuration
             .get_one::<String>("pattern")
             .unwrap(),
           dryrun,

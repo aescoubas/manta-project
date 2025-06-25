@@ -77,26 +77,16 @@ pub async fn exec(
   // PREPREQUISITES - GET DATA - TARGET HSM
 
   match backend.get_group(shasta_token, target_hsm_group_name).await {
-    /* match hsm::group::http_client::get(
-        shasta_token,
-        shasta_base_url,
-        shasta_root_cert,
-        Some(&target_hsm_group_name.to_string()),
-    )
-    .await
-    { */
     Ok(_) => {
       log::debug!("Target HSM group '{}' exists, good.", target_hsm_group_name)
     }
     Err(_) => {
       if create_target_hsm_group {
         log::info!("Target HSM group '{}' does not exist, but the option to create the group has been selected, creating it now.", target_hsm_group_name.to_string());
-
         if dryrun {
           log::error!(
             "Dryrun selected, cannot create the new group and continue."
           );
-          std::process::exit(1);
         } else {
           let group = Group {
             label: target_hsm_group_name.to_string(),
@@ -126,13 +116,6 @@ pub async fn exec(
     )
     .await
     .unwrap();
-  /* hsm::group::utils::get_member_vec_from_hsm_group_name(
-      shasta_token,
-      shasta_base_url,
-      shasta_root_cert,
-      target_hsm_group_name,
-  )
-  .await; */
 
   // Get HSM hw component counters for target HSM
   let mut target_hsm_node_hw_component_count_vec: Vec<(
@@ -173,13 +156,6 @@ pub async fn exec(
     )
     .await
     .unwrap();
-  /* hsm::group::utils::get_member_vec_from_hsm_group_name(
-      shasta_token,
-      shasta_base_url,
-      shasta_root_cert,
-      parent_hsm_group_name,
-  )
-  .await; */
 
   // Get HSM hw component counters for parent HSM
   let mut parent_hsm_node_hw_component_count_vec: Vec<(
