@@ -155,6 +155,7 @@ jobs:
           name: ${{ matrix.crate.name }}-binary
           path: target/release/${{ matrix.crate.name }}
 
+  # this job only upgrades the patch version
   cargo-release:
     needs: [changed_files, build_crates]
     runs-on: ubuntu-latest
@@ -196,7 +197,7 @@ jobs:
         if: ${{ matrix.condition }}
         run: |
           #cd ${{ matrix.crate.path }}
-          cargo release -p manta --no-confirm --no-publish --tag-prefix ${{ matrix.crate.name }}-v minor
+          cargo release -p manta --no-confirm --no-publish --tag-prefix ${{ matrix.crate.name }}-v patch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
