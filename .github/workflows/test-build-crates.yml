@@ -212,6 +212,10 @@ jobs:
         if: ${{ matrix.crate.condition }}
         run: cargo install cargo-release --locked
 
+      - name: Install git-cliff
+        if: ${{ matrix.crate.condition }}
+        run: cargo install git-cliff --locked
+
       - name: Configure git
         if: ${{ matrix.crate.condition }}
         run: |
