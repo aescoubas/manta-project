@@ -369,10 +369,7 @@ jobs:
 
       - name: Podman build for ${{ matrix.crate.name }}
         if: needs.cargo_release.outputs.tag_name != '' && startsWith(needs.cargo_release.outputs.tag_name, matrix.crate.tag_prefix)
-        with:
-          tag_name: ${{ needs.cargo_release.outputs.tag_name }}
-          image_name: manta-ws
-          run: |
-              podman build -t ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }} .
+        run: |
+            podman build -t ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }} .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
