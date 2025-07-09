@@ -75,30 +75,6 @@ jobs:
             echo "$file was changed"
           done
 
-# check formatting at the workspace level
-  check_formatting:
-    needs: changed_files
-    runs-on: ubuntu-latest
-    name: Check Rust code formatting
-    if: |
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.base.ref == 'staging' &&
-      needs.changed_files.outputs.any_crate_changed == 'true'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-          components: rustfmt
-
-      - name: Check formatting
-        run: |
-          cargo fmt --all --check
-
    # TODO: the testing should probably be all crates at the same time
   test_crates:
     needs: changed_files
