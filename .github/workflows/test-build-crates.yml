@@ -113,7 +113,7 @@ jobs:
           cd ${{ matrix.crate.path }} && cargo test
 
   build_crates:
-    needs: changed_files
+    needs: [test_crates]
     runs-on: ubuntu-latest
     strategy:
       matrix:
