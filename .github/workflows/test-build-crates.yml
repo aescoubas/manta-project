@@ -353,13 +353,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-    with:
+        with:
           submodules: recursive
 
       - name: Debug tag name
         run: |
           echo "Tag name: ${{ needs.cargo_release.outputs.tag_name }}"
-          echo "Full tag name:  ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }}"
+          echo "Full tag name:   ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }}"
       
       - name: Check Podman version
         run: podman version
