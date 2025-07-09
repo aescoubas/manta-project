@@ -76,8 +76,7 @@ jobs:
           done
 
 	# check formatting at the workspace level
-  check_formatting_workspace:
-    continue-on-error: true  # FOR TESTING Allow this job to fail without stopping the workflow
+  check_formatting:
     needs: changed_files
     runs-on: ubuntu-latest
     name: Check Rust code formatting
@@ -102,7 +101,6 @@ jobs:
 
 
   test_workspace:
-    continue-on-error: true  #FOR TESTING Allow this job to fail without stopping the workflow
     needs: changed_files
     runs-on: ubuntu-latest
     name: Test Rust workspace
@@ -187,9 +185,7 @@ jobs:
 #          cargo build --workspace
 
 	# single crate building version
-  # this will build and uploads all packages
   build_crates:
-    continue-on-error: true  # FOR TESTING Allow this job to fail without stopping the workflow
     needs: [test_crates]
     runs-on: ubuntu-latest
     strategy:
@@ -226,13 +222,12 @@ jobs:
           cargo build -p ${{ matrix.crate.name }} --release
 
       - name: Upload artifacts
-        #if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.crate.name }}-binary
           path: target/release/${{ matrix.crate.name }}
 
-  # this release will only release the relevant
   cargo-release:
     if: github.ref == 'refs/heads/main'
     needs: [changed_files, build_crates]
