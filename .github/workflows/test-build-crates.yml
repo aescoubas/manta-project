@@ -3,7 +3,7 @@ name: Check changed files and release
 on:
   push:
     branches:
-      #- 'staging' # we don't trigger this on direct push to this
+      - 'staging'
       - 'main'
     tags:
       - 'manta-v*'
@@ -76,12 +76,19 @@ jobs:
           done
 
 	# check formatting at the workspace level
-  # TODO: trigger if any changed
   check_formatting_workspace:
     continue-on-error: true  # FOR TESTING Allow this job to fail without stopping the workflow
     needs: changed_files
     runs-on: ubuntu-latest
     name: Check Rust code formatting
+      #    if: |
+      #      github.event_name == 'pull_request' &&
+      #      github.event.pull_request.base.ref == 'staging' &&
+      #      needs.changed_files.outputs.any_crate_changed == 'true'
+    if: |
+      github.event_name == 'pull_request' &&
+      (github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'main') &&
+      needs.changed_files.outputs.any_crate_changed == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -107,6 +114,10 @@ jobs:
       #   github.event_name == 'pull_request' &&
       #   github.event.pull_request.base.ref == 'staging' &&
       #   needs.changed_files.outputs.any_crate_changed == 'true'
+    if: |
+      github.event_name == 'pull_request' &&
+      (github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'main') &&
+      needs.changed_files.outputs.any_crate_changed == 'true'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -183,11 +194,18 @@ jobs:
 #        run: |
 #          cargo build --workspace
 
+	# single crate building version
+  # this will build and uploads all packages
   # case #1: for testing that everything builds in pull request
   # case #2: for actually building the packages in the push to main
   # We need to rerun this when we build since this is when the github release artifacts are generated
-  build_crates_workspace:
+  build_crates:
     continue-on-error: true  # FOR TESTING Allow this job to fail without stopping the workflow
+    if: |
+      ( github.event_name == 'pull_request' &&
+        (github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'main') &&
+        needs.changed_files.outputs.any_crate_changed == 'true' 
+      ) || github.ref == 'refs/heads/main'
     needs: [check_formatting_workspace, test_workspace]
     runs-on: ubuntu-latest
     strategy:
@@ -223,18 +241,17 @@ jobs:
         run: |
           cargo build -p ${{ matrix.crate.name }} --release
 
-      # TODO: maybe only upload the artifacts for the build that is necessary
       - name: Upload artifacts
-        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
+        #if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.crate.name }}-binary
           path: target/release/${{ matrix.crate.name }}
 
   # this release will only release the relevant
-  cargo_release:
+  cargo-release:
     if: github.ref == 'refs/heads/main'
-    needs: [changed_files, build_crates_workspace]
+    needs: [changed_files, build_crates]
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.set-tag.outputs.tag_name }}
@@ -261,9 +278,9 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Install cargo_release
+      - name: Install cargo-release
         if: ${{ matrix.crate.condition }}
-        run: cargo install cargo_release --locked
+        run: cargo install cargo-release --locked
 
       - name: Install git-cliff
         if: ${{ matrix.crate.condition }}
@@ -275,7 +292,7 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-      - name: Run cargo_release for ${{ matrix.crate.name }}
+      - name: Run cargo-release for ${{ matrix.crate.name }}
         if: ${{ matrix.crate.condition }}
         id: run-release
         run: |
@@ -293,9 +310,9 @@ jobs:
           # Use the tag from the first matrix job that ran (since only one tag is expected)
           echo "tag_name=${{ steps.run-release.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
-  github_release:
+  github-release:
     if: github.ref == 'refs/heads/main'
-    needs: [changed_files, build_crates_workspace, cargo_release]
+    needs: [changed_files, build_crates, cargo-release]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -316,23 +333,23 @@ jobs:
 
       - name: Debug tag name
         run: |
-          echo "Tag name: ${{ needs.cargo_release.outputs.tag_name }}"
+          echo "Tag name: ${{ needs.cargo-release.outputs.tag_name }}"
 
       - name: Download artifact for ${{ matrix.crate.name }}
-        if: needs.cargo_release.outputs.tag_name != '' && startsWith(needs.cargo_release.outputs.tag_name, matrix.crate.tag_prefix)
+        if: needs.cargo-release.outputs.tag_name != '' && startsWith(needs.cargo-release.outputs.tag_name, matrix.crate.tag_prefix)
         uses: actions/download-artifact@v4
         with:
           name: ${{ matrix.crate.artifact_name }}
           path: artifacts/
 
       - name: Create Release for ${{ matrix.crate.name }}
-        if: needs.cargo_release.outputs.tag_name != '' && startsWith(needs.cargo_release.outputs.tag_name, matrix.crate.tag_prefix)
+        if: needs.cargo-release.outputs.tag_name != '' && startsWith(needs.cargo-release.outputs.tag_name, matrix.crate.tag_prefix)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.cargo_release.outputs.tag_name }}
-          name: ${{ matrix.crate.name }} Release ${{ needs.cargo_release.outputs.tag_name }}
+          tag_name: ${{ needs.cargo-release.outputs.tag_name }}
+          name: ${{ matrix.crate.name }} Release ${{ needs.cargo-release.outputs.tag_name }}
           body: |
-            Release for ${{ matrix.crate.name }} ${{ needs.cargo_release.outputs.tag_name }}.
+            Release for ${{ matrix.crate.name }} ${{ needs.cargo-release.outputs.tag_name }}.
             Changes in this release:
             - See commit history or CHANGELOG.md for details.
           draft: false
