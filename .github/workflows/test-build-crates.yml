@@ -228,7 +228,8 @@ jobs:
           name: ${{ matrix.crate.name }}-binary
           path: target/release/${{ matrix.crate.name }}
 
-  # this release will only release the relevant
+  # CARGO RELEASE STAGE ------------------------------------------------
+  # the changelog generation is included in that stage
   cargo_release:
     if: github.ref == 'refs/heads/main'
     needs: [build_crates_workspace]
@@ -266,6 +267,34 @@ jobs:
         if: ${{ matrix.crate.condition }}
         run: cargo install git-cliff --locked
 
+      - name: Get Cargo version
+        id: cargo-version
+        run: |
+          VERSION=$(grep '^version' Cargo.toml | head -n1 | cut -d'"' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate CHANGELOG.md
+        id: generate
+        run: |
+          git-cliff --config cliff.toml --tag ${{ steps.cargo-version.outputs.version }} -o CHANGELOG.md
+          if git diff --quiet CHANGELOG.md; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit changelog
+        if: steps.generate.outputs.changes == 'true'
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add CHANGELOG.md
+          git commit -m "chore: update CHANGELOG.md for v${{ steps.cargo-version.outputs.version }} [skip ci]"
+          git push
+
+
       - name: Configure git
         if: ${{ matrix.crate.condition }}
         run: |
@@ -290,6 +319,7 @@ jobs:
           # Use the tag from the first matrix job that ran (since only one tag is expected)
           echo "tag_name=${{ steps.run-release.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
+  #  ------------------------------------------------
   github_release:
     if: github.ref == 'refs/heads/main'
     needs: [build_crates_workspace, cargo_release]
@@ -373,3 +403,5 @@ jobs:
             podman build -t ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }} .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
