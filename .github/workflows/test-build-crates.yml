@@ -1,5 +1,8 @@
 name: Check changed files and release
 
+env: 
+  CONTAINER_REGISTRY: ghcr.io  # GitHub Container Registry
+
 on:
   push:
     branches:
@@ -333,5 +336,43 @@ jobs:
           prerelease: false
           files: |
             artifacts/${{ matrix.crate.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
+  build_publish_container_image:
+    if: github.ref == 'refs/heads/main'
+    needs: [build_crates_workspace, cargo_release]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        crate:
+          - name: manta-ws
+            output_prefix: manta_ws
+            artifact_name: manta-ws-binary
+            tag_prefix: manta-ws-v
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+    with:
+          submodules: recursive
+
+      - name: Debug tag name
+        run: |
+          echo "Tag name: ${{ needs.cargo_release.outputs.tag_name }}"
+          echo "Full tag name:  ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }}"
+      
+      - name: Check Podman version
+        run: podman version
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | podman login ${{ env.CONTAINER_REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Podman build for ${{ matrix.crate.name }}
+        if: needs.cargo_release.outputs.tag_name != '' && startsWith(needs.cargo_release.outputs.tag_name, matrix.crate.tag_prefix)
+        with:
+          tag_name: ${{ needs.cargo_release.outputs.tag_name }}
+          image_name: manta-ws
+          run: |
+              podman build -t ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }} .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
