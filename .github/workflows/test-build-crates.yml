@@ -234,7 +234,7 @@ jobs:
   # this release will only release the relevant
   cargo_release:
     if: github.ref == 'refs/heads/main'
-    needs: [changed_files, build_crates_workspace]
+    needs: [changed_files, build_crates_workspace, test_workspace]
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.set-tag.outputs.tag_name }}
@@ -295,7 +295,7 @@ jobs:
 
   github_release:
     if: github.ref == 'refs/heads/main'
-    needs: [changed_files, build_crates_workspace, cargo_release]
+    needs: [changed_files, build_crates_workspace, test_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
       matrix:
