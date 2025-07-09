@@ -81,13 +81,9 @@ jobs:
     needs: changed_files
     runs-on: ubuntu-latest
     name: Check Rust code formatting
-      #    if: |
-      #      github.event_name == 'pull_request' &&
-      #      github.event.pull_request.base.ref == 'staging' &&
-      #      needs.changed_files.outputs.any_crate_changed == 'true'
     if: |
       github.event_name == 'pull_request' &&
-      (github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'main') &&
+      github.event.pull_request.base.ref == 'staging' &&
       needs.changed_files.outputs.any_crate_changed == 'true'
     steps:
       - uses: actions/checkout@v4
@@ -110,13 +106,9 @@ jobs:
     needs: changed_files
     runs-on: ubuntu-latest
     name: Test Rust workspace
-      # if: |
-      #   github.event_name == 'pull_request' &&
-      #   github.event.pull_request.base.ref == 'staging' &&
-      #   needs.changed_files.outputs.any_crate_changed == 'true'
     if: |
       github.event_name == 'pull_request' &&
-      (github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'main') &&
+      github.event.pull_request.base.ref == 'staging' &&
       needs.changed_files.outputs.any_crate_changed == 'true'
     steps:
       - uses: actions/checkout@v4
@@ -196,17 +188,9 @@ jobs:
 
 	# single crate building version
   # this will build and uploads all packages
-  # case #1: for testing that everything builds in pull request
-  # case #2: for actually building the packages in the push to main
-  # We need to rerun this when we build since this is when the github release artifacts are generated
   build_crates:
     continue-on-error: true  # FOR TESTING Allow this job to fail without stopping the workflow
-    if: |
-      ( github.event_name == 'pull_request' &&
-        (github.event.pull_request.base.ref == 'staging' || github.event.pull_request.base.ref == 'main') &&
-        needs.changed_files.outputs.any_crate_changed == 'true' 
-      ) || github.ref == 'refs/heads/main'
-    needs: [check_formatting_workspace, test_workspace]
+    needs: [test_crates]
     runs-on: ubuntu-latest
     strategy:
       matrix:
