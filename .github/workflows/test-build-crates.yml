@@ -182,7 +182,7 @@ jobs:
   # We need to rerun this when we build since this is when the github release artifacts are generated
   build_crates_workspace:
     continue-on-error: true  # FOR TESTING Allow this job to fail without stopping the workflow
-    needs: [check_formatting_workspace]
+    needs: [check_formatting_workspace, test_workspace]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -228,7 +228,7 @@ jobs:
   # this release will only release the relevant
   cargo_release:
     if: github.ref == 'refs/heads/main'
-    needs: [changed_files, build_crates_workspace, test_workspace]
+    needs: [build_crates_workspace]
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.set-tag.outputs.tag_name }}
@@ -289,7 +289,7 @@ jobs:
 
   github_release:
     if: github.ref == 'refs/heads/main'
-    needs: [changed_files, build_crates_workspace, test_workspace, cargo_release]
+    needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
       matrix:
