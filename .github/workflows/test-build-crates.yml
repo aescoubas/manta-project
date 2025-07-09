@@ -3,7 +3,7 @@ name: Check changed files and release
 on:
   push:
     branches:
-      #- 'staging' # we don't trigger this on direct push to this
+      - 'staging' # we don't trigger this on direct push to this
       - 'main'
     tags:
       - 'manta-v*'
