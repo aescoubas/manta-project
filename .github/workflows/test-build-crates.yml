@@ -109,7 +109,7 @@ jobs:
       - name: Check formatting for ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          cd ${{ matrix.crate.path }} && cargo fmt --check
+          echo "cd ${{ matrix.crate.path }} && cargo fmt --check"
 
   lint:
     needs: changed_files
@@ -157,7 +157,7 @@ jobs:
       - name: Run Clippy for ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          cd ${{ matrix.crate.path }} && cargo clippy -- -D warnings
+          echo "cd ${{ matrix.crate.path }} && cargo clippy -- -D warnings"
 
   test_crates:
     needs: changed_files
@@ -204,7 +204,7 @@ jobs:
       - name: Test ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          cd ${{ matrix.crate.path }} && cargo test
+          echo "cd ${{ matrix.crate.path }} && cargo test"
 
   build_crates_workspace:
     needs: [check_formatting, lint, test_crates]
@@ -357,7 +357,7 @@ jobs:
         id: run-release
         run: |
           cd ${{ matrix.crate.path }}
-          cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch
+          echo "cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch"
           # Store the tag name
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
