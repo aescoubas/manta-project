@@ -278,7 +278,7 @@ jobs:
 
       - name: Generate CHANGELOG.md
         if: ${{ matrix.crate.condition }}
-        id: generate_changelog
+        id: generate
         run: |
           git-cliff --config cliff.toml --tag ${{ steps.cargo-version.outputs.version }} -o CHANGELOG.md
           if git diff --quiet CHANGELOG.md; then
@@ -290,8 +290,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit changelog
-        if: ${{ matrix.crate.condition }}
-        if: steps.generate.outputs.changes == 'true'
+        if: ${{ matrix.crate.condition }} && steps.generate.outputs.changes == 'true'
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
@@ -320,6 +319,7 @@ jobs:
 
       - name: Set tag name output
         id: set-tag
+        if: ${{ matrix.crate.condition }}
         run: |
           # Use the tag from the first matrix job that ran (since only one tag is expected)
           echo "tag_name=${{ steps.run-release.outputs.tag_name }}" >> $GITHUB_OUTPUT
