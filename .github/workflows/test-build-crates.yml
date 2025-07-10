@@ -232,7 +232,7 @@ jobs:
   # the changelog generation is included in that stage
   cargo_release:
     if: github.ref == 'refs/heads/main'
-    needs: [build_crates_workspace]
+    needs: [changed_files, build_crates_workspace]
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.set-tag.outputs.tag_name }}
