@@ -249,12 +249,14 @@ jobs:
             condition: ${{ needs.changed_files.outputs.manta_ws_any_changed == 'true' }}
     steps:
       - name: Checkout code
+        if: ${{ matrix.crate.condition }}
         uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.GITHUB_TOKEN }}  # Required for pushing changes
 
       - name: Install Rust
+        if: ${{ matrix.crate.condition }}
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -268,13 +270,15 @@ jobs:
         run: cargo install git-cliff --locked
 
       - name: Get Cargo version
+        if: ${{ matrix.crate.condition }}
         id: cargo-version
         run: |
           VERSION=$(grep '^version' Cargo.toml | head -n1 | cut -d'"' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Generate CHANGELOG.md
-        id: generate
+        if: ${{ matrix.crate.condition }}
+        id: generate_changelog
         run: |
           git-cliff --config cliff.toml --tag ${{ steps.cargo-version.outputs.version }} -o CHANGELOG.md
           if git diff --quiet CHANGELOG.md; then
@@ -286,6 +290,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit changelog
+        if: ${{ matrix.crate.condition }}
         if: steps.generate.outputs.changes == 'true'
         run: |
           git config user.name "GitHub Actions"
