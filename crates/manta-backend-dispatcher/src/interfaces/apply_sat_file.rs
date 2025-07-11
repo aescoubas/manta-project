@@ -21,6 +21,7 @@ pub trait SatTrait {
     _do_not_reboot: bool,
     _watch_logs: bool,
     _debug_on_failure: bool,
+    _overwrite: bool,
     _dry_run: bool,
   ) -> impl Future<Output = Result<(), Error>> + Send {
     async {

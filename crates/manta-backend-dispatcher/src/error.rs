@@ -20,4 +20,6 @@ pub enum Error {
   CsmError(Value),
   #[error("ERROR - Console: {0}")]
   ConsoleError(String),
+  #[error("ERROR - CFS Configuration already exists: {0}")]
+  ConfigurationAlreadyExistsError(String),
 }

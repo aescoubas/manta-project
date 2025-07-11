@@ -214,6 +214,7 @@ pub trait CfsTrait {
     _shasta_root_cert: &[u8],
     _configuration: &CfsConfigurationRequest,
     _configuration_name: &str,
+    _overwrite: bool,
   ) -> impl Future<Output = Result<CfsConfigurationResponse, Error>> + Send {
     async {
       Err(Error::Message(
