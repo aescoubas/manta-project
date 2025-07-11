@@ -5,16 +5,16 @@ env:
 
 on:
   workflow_dispatch:
-  inputs:
-    release_level:
-      description: 'Release level'
-      required: true
-      type: choice
-      default: 'patch'
-      options:
-        - patch
-        - minor
-        - major
+    inputs:
+      release_level:
+        description: 'Release level'
+        required: true
+        type: choice
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
   push:
     branches:
       - 'main'
