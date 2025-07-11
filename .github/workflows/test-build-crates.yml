@@ -219,7 +219,7 @@ jobs:
           echo "cd ${{ matrix.crate.path }} && cargo test"
 
   build_crates_workspace:
-    needs: [check_formatting, lint, test_crates]
+    needs: [changed_files, check_formatting, lint, test_crates]
     runs-on: ubuntu-latest
     strategy:
       matrix:
