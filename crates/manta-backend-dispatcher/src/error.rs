@@ -22,4 +22,6 @@ pub enum Error {
   ConsoleError(String),
   #[error("ERROR - CFS Configuration already exists: {0}")]
   ConfigurationAlreadyExistsError(String),
+  #[error("ERROR - CFS Configuration not found: {0}")]
+  ConfigurationNotFound(String),
 }
