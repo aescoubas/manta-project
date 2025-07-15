@@ -1,58 +1,60 @@
-// #![allow(dead_code, unused_imports)] // TODO: to avoid compiler from complaining about unused methods
+#![allow(dead_code, unused_imports)] // TODO: to avoid compiler from complaining about unused methods
 
+use std::error::Error;
 // Code below inspired on https://github.com/rust-lang/git2-rs/issues/561
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
-use git2::{Commit, ObjectType, Repository};
+use dialoguer::{Input, Password};
+use git2::{Commit, ObjectType, PushOptions, Remote, Repository};
 
 pub fn get_repo(repo_path: &str) -> Result<Repository, git2::Error> {
-  let repo_root = PathBuf::from(repo_path);
+    let repo_root = PathBuf::from(repo_path);
 
-  log::debug!("Checking repo on {}", repo_root.display());
+    log::debug!("Checking repo on {}", repo_root.display());
 
-  Repository::open(repo_root.as_os_str())
+    Repository::open(repo_root.as_os_str())
 }
 
 pub fn get_last_commit(repo: &Repository) -> Result<Commit<'_>, git2::Error> {
-  let obj = repo.head()?.resolve()?.peel(ObjectType::Commit)?;
-  obj
-    .into_commit()
-    .map_err(|_| git2::Error::from_str("Couldn't find commit"))
+    let obj = repo.head()?.resolve()?.peel(ObjectType::Commit)?;
+    obj.into_commit()
+        .map_err(|_| git2::Error::from_str("Couldn't find commit"))
 }
 
 pub fn untracked_changed_local_files(
-  repo: &Repository,
+    repo: &Repository,
 ) -> Result<bool, Box<dyn std::error::Error>> {
-  // use walkdir::WalkDir;
+    // use walkdir::WalkDir;
 
-  // let root = std::env::current_dir().unwrap();
+    // let root = std::env::current_dir().unwrap();
 
-  // // Check tree/indexes Adding all files (git add)
-  // for file in WalkDir::new(&root) {
+    // // Check tree/indexes Adding all files (git add)
+    // for file in WalkDir::new(&root) {
 
-  //     let file_aux = file.unwrap();
+    //     let file_aux = file.unwrap();
 
-  //     if file_aux.metadata().unwrap().is_file() {
+    //     if file_aux.metadata().unwrap().is_file() {
 
-  //         // println!("{}", file_aux.path().display());
-  //         // println!("{}", file_aux.path().strip_prefix(&root).unwrap().display());
+    //         // println!("{}", file_aux.path().display());
+    //         // println!("{}", file_aux.path().strip_prefix(&root).unwrap().display());
 
-  //         let status = repo.status_file(file_aux.path().strip_prefix(&root).unwrap()).unwrap();
+    //         let status = repo.status_file(file_aux.path().strip_prefix(&root).unwrap()).unwrap();
 
-  //         if status.contains(git2::Status::WT_MODIFIED) || status.contains(git2::Status::WT_NEW) {
-  //             println!("{}", file_aux.path().display());
-  //             return Ok(false);
-  //         }
-  //     }
-  // }
+    //         if status.contains(git2::Status::WT_MODIFIED) || status.contains(git2::Status::WT_NEW) {
+    //             println!("{}", file_aux.path().display());
+    //             return Ok(false);
+    //         }
+    //     }
+    // }
 
-  // Ok(true)
+    // Ok(true)
 
-  let mut index = repo.index().unwrap();
+    let mut index = repo.index().unwrap();
 
-  log::debug!("Checking git index...");
+    log::debug!("Checking git index...");
 
-  match index.add_all(
+    match index.add_all(
         ["."],
         git2::IndexAddOption::DEFAULT,
         Some(&mut |path: &Path, _matched_spec: &[u8]| -> i32 {
@@ -74,7 +76,7 @@ pub fn untracked_changed_local_files(
     }
 }
 
-/* /// equivalent to `git add .`
+/// equivalent to `git add .`
 pub fn add_all(repo: &Repository) {
     let mut index = repo.index().unwrap();
 
@@ -112,9 +114,9 @@ pub fn add_all(repo: &Repository) {
 
     // Persists index
     index.write().unwrap();
-} */
+}
 
-/* pub fn commit(repo: &Repository) {
+pub fn commit(repo: &Repository) {
     let mut index = repo.index().unwrap();
     let oid = index.write_tree().unwrap();
     let signature = repo.signature().unwrap();
@@ -129,9 +131,9 @@ pub fn add_all(repo: &Repository) {
         &[&parent_commit],
     )
     .unwrap();
-} */
+}
 
-/* pub fn push(mut remote: Remote) -> Result<(), git2::Error> {
+pub fn push(mut remote: Remote) -> Result<(), git2::Error> {
     // Configure callbacks for push operation
     let mut callbacks = git2::RemoteCallbacks::new();
 
@@ -194,9 +196,9 @@ pub fn add_all(repo: &Repository) {
         ],
         Some(po),
     )
-} */
+}
 
-/* pub fn fetch<'a>(
+pub fn fetch<'a>(
     repo: &'a git2::Repository,
     refs: &[&str],
     remote: &'a mut git2::Remote,
@@ -292,9 +294,9 @@ pub fn add_all(repo: &Repository) {
 
     let fetch_head = repo.find_reference("FETCH_HEAD")?;
     Ok(repo.reference_to_annotated_commit(&fetch_head)?)
-} */
+}
 
-/* pub fn has_conflicts(
+pub fn has_conflicts(
     repo: &Repository,
     local: &git2::AnnotatedCommit,
     remote: &git2::AnnotatedCommit,
@@ -313,9 +315,9 @@ pub fn add_all(repo: &Repository) {
     }
 
     Ok(())
-} */
+}
 
-/* pub fn fetch_and_check_conflicts(repo: &Repository) -> core::result::Result<(), Box<dyn Error>> {
+pub fn fetch_and_check_conflicts(repo: &Repository) -> core::result::Result<(), Box<dyn Error>> {
     let head_commit = repo.reference_to_annotated_commit(&repo.head()?)?;
     let mut remote_aux = repo.find_remote("origin")?;
     let remote_branch = "apply-dynamic-target-session";
@@ -323,4 +325,4 @@ pub fn add_all(repo: &Repository) {
     has_conflicts(repo, &head_commit, &fetch_commit)?;
 
     Ok(())
-} */
+}
