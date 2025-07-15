@@ -76,10 +76,11 @@ jobs:
               - crates/csm-rs/**
 
   check_formatting:
+    name: Check Rust code formatting
     needs: changed_files
     runs-on: ubuntu-latest
-    name: Check Rust code formatting
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -124,10 +125,11 @@ jobs:
           echo "cd ${{ matrix.crate.path }} && cargo fmt --check"
 
   lint:
+    name: Lint Rust code with Clippy
     needs: changed_files
     runs-on: ubuntu-latest
-    name: Lint Rust code with Clippy
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -172,10 +174,11 @@ jobs:
           echo "cd ${{ matrix.crate.path }} && cargo clippy -- -D warnings"
 
   test_crates:
+    name: Test Rust crates
     needs: changed_files
     runs-on: ubuntu-latest
-    name: Test Rust crates
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -222,6 +225,7 @@ jobs:
     needs: [changed_files, check_formatting, lint, test_crates]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -286,6 +290,7 @@ jobs:
     outputs:
       tag_name: ${{ steps.set-tag.outputs.tag_name }}
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -395,6 +400,7 @@ jobs:
     needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -452,6 +458,7 @@ jobs:
     needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta-ws
