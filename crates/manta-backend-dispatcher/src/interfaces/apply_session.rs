@@ -1,9 +1,9 @@
-use std::{future::Future, path::PathBuf};
+use std::future::Future;
 
 use crate::error::Error;
 
 pub trait ApplySessionTrait {
-  fn i_apply_session(
+  fn apply_session(
     &self,
     _gitea_token: &str,
     _gitea_base_url: &str,
@@ -14,7 +14,8 @@ pub trait ApplySessionTrait {
     _cfs_conf_sess_name: Option<&String>,
     _playbook_yaml_file_name_opt: Option<&String>,
     _hsm_group: Option<&String>,
-    _repos_paths: Vec<PathBuf>,
+    _repo_name_vec: Vec<String>,
+    _repo_last_commit_id_vec: Vec<String>,
     _ansible_limit: Option<String>,
     _ansible_verbosity: Option<String>,
     _ansible_passthrough: Option<String>,
