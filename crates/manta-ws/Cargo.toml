@@ -1,16 +1,16 @@
 [package]
 name = "manta-ws"
 description = "HTTP server for Mesa"
-version = "0.1.14"
+version = "0.1.15"
 edition = "2024"
 publish = false
 
-#[profile.release]
-#opt-level = 'z'     # Optimize for size
-#lto = true          # Enable link-time optimization
-#codegen-units = 1   # Reduce number of codegen units to increase optimizations
-#panic = 'abort'     # Abort on panic
-#strip = true        # Strip symbols from binary*
+[profile.release]
+opt-level = 'z'     # Optimize for size
+lto = true          # Enable link-time optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations
+panic = 'abort'     # Abort on panic
+strip = true        # Strip symbols from binary*
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -26,9 +26,12 @@ publish = false
 # DEV
 
 #manta-backend-dispatcher = { path = "../manta-backend-dispatcher" } # Only for development purposes
+# manta-backend-dispatcher = { git = "https://github.com/eth-cscs/manta-backend-dispatcher", branch="feature/power-status" } # Only for development purposes
 #ochami-rs = { path = "../ochami-rs" } # Only for development purposes
+# ochami-rs = { git = "https://github.com/OpenCHAMI/ochami-rs", branch="feature/power-status" } # Only for development purposes
 #csm-rs = { path = "../csm-rs" } # Only for development purposes
-manta-backend-dispatcher = "0.1.79"
+# csm-rs = { git = "https://github.com/eth-cscs/csm-rs", branch="feature/power-status" } # Only for development purposes
+manta-backend-dispatcher = "=0.1.79"
 csm-rs = "0.5.0-beta.11"
 ochami-rs = "0.1.78"
 
@@ -58,5 +61,3 @@ utoipa = { version = "5.3.1" }
 
 [profile.dev]
 incremental = true
-
-
