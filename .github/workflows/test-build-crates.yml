@@ -276,7 +276,8 @@ jobs:
         run: |
           cargo --version
           rustc --version
-          cargo build -p ${{ matrix.crate.name }} --release
+          #cargo build -p ${{ matrix.crate.name }} --release
+          cargo build --manifest-path crates/${{ matrix.crate.name }}/Cargo.toml  --release
 
       - name: Upload artifacts
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
