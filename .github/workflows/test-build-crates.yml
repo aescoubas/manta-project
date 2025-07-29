@@ -18,6 +18,7 @@ on:
   push:
     branches:
       - 'main'
+        #- 'staging'
     tags:
       - 'manta-v*'
       - 'manta-ws-v*'
@@ -75,10 +76,11 @@ jobs:
               - crates/csm-rs/**
 
   check_formatting:
+    name: Check Rust code formatting
     needs: changed_files
     runs-on: ubuntu-latest
-    name: Check Rust code formatting
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -123,10 +125,11 @@ jobs:
           echo "cd ${{ matrix.crate.path }} && cargo fmt --check"
 
   lint:
+    name: Lint Rust code with Clippy
     needs: changed_files
     runs-on: ubuntu-latest
-    name: Lint Rust code with Clippy
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -171,10 +174,11 @@ jobs:
           echo "cd ${{ matrix.crate.path }} && cargo clippy -- -D warnings"
 
   test_crates:
+    name: Test Rust crates
     needs: changed_files
     runs-on: ubuntu-latest
-    name: Test Rust crates
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -218,9 +222,10 @@ jobs:
           echo "cd ${{ matrix.crate.path }} && cargo test"
 
   build_crates_workspace:
-    needs: [check_formatting, lint, test_crates]
+    needs: [changed_files, check_formatting, lint, test_crates]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -258,10 +263,21 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
+#      - name: Debug condition
+#        env:
+#          debug_1: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] }}
+#          debug_2: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+#        run: |
+#          echo $debug_1
+#          echo $debug_2
+
       - name: Build ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          cargo build -p ${{ matrix.crate.name }} --release
+          cargo --version
+          rustc --version
+          #cargo build -p ${{ matrix.crate.name }} --release
+          cargo build --manifest-path crates/${{ matrix.crate.name }}/Cargo.toml  --release
 
       - name: Upload artifacts
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
@@ -277,6 +293,7 @@ jobs:
     outputs:
       tag_name: ${{ steps.set-tag.outputs.tag_name }}
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -386,6 +403,7 @@ jobs:
     needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta
@@ -443,6 +461,7 @@ jobs:
     needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         crate:
           - name: manta-ws

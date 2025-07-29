@@ -1,3 +1,4 @@
 pub mod console;
-pub mod types;
+pub mod r#struct;
+pub mod traits;
 pub mod utils;

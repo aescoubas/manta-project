@@ -11,10 +11,19 @@ repository = "https://github.com/eth-cscs/manta-project"
 
 [workspace]
 members = [ 
+    #"crates/ochami-rs",
+    #"crates/csm-rs",
+    #"crates/manta-ws",
+    #"crates/manta",
+    #"crates/manta-backend-dispatcher"
+] 
+exclude = [
     "crates/ochami-rs",
     "crates/csm-rs",
     "crates/manta-ws",
     "crates/manta",
     "crates/manta-backend-dispatcher"
-] 
+]
 resolver = "2"
+
+
