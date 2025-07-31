@@ -362,7 +362,8 @@ jobs:
             echo "Changes to Changelog detected"
             git config user.name "GitHub Actions"
             git config user.email "actions@github.com"
-            git add ${{ matrix.crate.path }}/CHANGELOG.md
+            #git add ${{ matrix.crate.path }}/CHANGELOG.md
+            git add ./CHANGELOG.md
             git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.cargo-version.outputs.version }} [skip ci]"
             git push
           else
