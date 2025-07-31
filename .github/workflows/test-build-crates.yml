@@ -395,7 +395,7 @@ jobs:
         run: |
           cd ${{ matrix.crate.path }}
           #echo "cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch"
-          cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch
+          cargo release patch --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} 
           # Store the tag name
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
