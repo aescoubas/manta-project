@@ -385,7 +385,8 @@ jobs:
         id: run-release
         run: |
           cd ${{ matrix.crate.path }}
-          echo "cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch"
+          #echo "cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch"
+          cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch
           # Store the tag name
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
@@ -399,7 +400,7 @@ jobs:
           echo "tag_name=${{ steps.run-release.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
   github_release:
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
     needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
@@ -457,7 +458,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             
   build_publish_container_image:
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
     needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
