@@ -263,20 +263,11 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
-#      - name: Debug condition
-#        env:
-#          debug_1: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] }}
-#          debug_2: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-#        run: |
-#          echo $debug_1
-#          echo $debug_2
-
       - name: Build ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
           cargo --version
           rustc --version
-          #cargo build -p ${{ matrix.crate.name }} --release
           cargo build --manifest-path crates/${{ matrix.crate.name }}/Cargo.toml  --release
 
       - name: Upload artifacts
@@ -287,8 +278,8 @@ jobs:
           path: target/release/${{ matrix.crate.name }}
 
   cargo_release:
-    #if: github.ref == 'refs/heads/main'
     needs: [changed_files, build_crates_workspace]
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.set-tag.outputs.tag_name }}
@@ -322,6 +313,15 @@ jobs:
             condition: ${{ needs.changed_files.outputs.csm_rs_any_changed == 'true' }}
             tag_prefix: csm-rs-v
     steps:
+      - name: Set release level
+        id: set-level
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "level=${{ inputs.release_level }}" >> $GITHUB_OUTPUT
+          else
+            echo "level=patch" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout code
         if: ${{ matrix.crate.condition }}
         uses: actions/checkout@v4
@@ -351,12 +351,33 @@ jobs:
           VERSION=$(grep '^version' Cargo.toml | head -n1 | cut -d'"' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Compute new version
+        if: ${{ matrix.crate.condition }}
+        id: new-version
+        run: |
+          current="${{ steps.cargo-version.outputs.version }}"
+          major=$(echo $current | cut -d. -f1)
+          minor=$(echo $current | cut -d. -f2)
+          patch=$(echo $current | cut -d. -f3)
+          level="${{ steps.set-level.outputs.level }}"
+          if [ "$level" = "major" ]; then
+            new_major=$((major + 1))
+            new="$new_major.0.0"
+          elif [ "$level" = "minor" ]; then
+            new_minor=$((minor + 1))
+            new="$major.$new_minor.0"
+          else # patch
+            new_patch=$((patch + 1))
+            new="$major.$minor.$new_patch"
+          fi
+          echo "new_version=$new" >> $GITHUB_OUTPUT
+
       - name: Generate CHANGELOG.md
         if: ${{ matrix.crate.condition }}
         id: generate
         run: |
           cd ${{ matrix.crate.path }}
-          git-cliff --config ../../cliff.toml --tag ${{ steps.cargo-version.outputs.version }} -o CHANGELOG.md
+          git-cliff --config ../../cliff.toml --tag ${{ steps.new-version.outputs.new_version }} -o CHANGELOG.md
           if git diff --quiet CHANGELOG.md; then
             echo "changes=false" >> $GITHUB_OUTPUT
           else
@@ -371,7 +392,7 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add ${{ matrix.crate.path }}/CHANGELOG.md
-          git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.cargo-version.outputs.version }} [skip ci]"
+          git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.new-version.outputs.new_version }} [skip ci]"
           git push
 
       - name: Configure git
@@ -385,8 +406,7 @@ jobs:
         id: run-release
         run: |
           cd ${{ matrix.crate.path }}
-          #echo "cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch"
-          cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch
+          cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.crate.tag_prefix }} ${{ steps.set-level.outputs.level }}
           # Store the tag name
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
@@ -400,8 +420,8 @@ jobs:
           echo "tag_name=${{ steps.run-release.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
   github_release:
-    #if: github.ref == 'refs/heads/main'
     needs: [build_crates_workspace, cargo_release]
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -458,8 +478,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             
   build_publish_container_image:
-    #if: github.ref == 'refs/heads/main'
     needs: [build_crates_workspace, cargo_release]
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
