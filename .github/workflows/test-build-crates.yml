@@ -358,9 +358,9 @@ jobs:
           cd ${{ matrix.crate.path }}
           git-cliff --config ../../cliff.toml --tag ${{ steps.cargo-version.outputs.version }} -o CHANGELOG.md
 
-          git diff CHANGELOG.md
+          #git diff CHANGELOG.md
 
-          if git diff --quiet CHANGELOG.md; then
+          if git diff --exit-code --quiet CHANGELOG.md; then
             #echo "changes=false" >> $GITHUB_OUTPUT
             echo "Changes to Changelog detected"
             git config user.name "GitHub Actions"
