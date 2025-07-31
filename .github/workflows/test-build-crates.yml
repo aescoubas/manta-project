@@ -366,7 +366,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit changelog
-        if: ${{ matrix.crate.condition }}
         if: ${{ matrix.crate.condition }} && steps.generate.outputs.changes == 'true'
         run: |
           git config user.name "GitHub Actions"
