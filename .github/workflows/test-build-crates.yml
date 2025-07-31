@@ -279,7 +279,8 @@ jobs:
 
   cargo_release:
     needs: [changed_files, build_crates_workspace]
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    #if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' 
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.set-tag.outputs.tag_name }}
