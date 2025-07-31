@@ -361,7 +361,8 @@ jobs:
           #git diff CHANGELOG.md
 
           if git diff --exit-code --quiet CHANGELOG.md; then
-            #echo "changes=false" >> $GITHUB_OUTPUT
+            echo "NO changes to Changelog detected"
+          else
             echo "Changes to Changelog detected"
             git config user.name "GitHub Actions"
             git config user.email "actions@github.com"
@@ -369,9 +370,6 @@ jobs:
             git add ./CHANGELOG.md
             git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.cargo-version.outputs.version }} [skip ci]"
             git push
-          else
-            echo "NO changes to Changelog detected"
-          #echo "changes=true" >> $GITHUB_OUTPUT
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
