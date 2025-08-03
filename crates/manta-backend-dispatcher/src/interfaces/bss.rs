@@ -1,6 +1,6 @@
 use std::future::Future;
 
-use crate::{error::Error, types::BootParameters};
+use crate::{error::Error, types::bss::BootParameters};
 
 pub trait BootParametersTrait {
   fn get_all_bootparameters(

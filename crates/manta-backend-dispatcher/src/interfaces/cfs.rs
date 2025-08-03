@@ -1,5 +1,6 @@
 use std::future::Future;
 
+use crate::types::bss::BootParameters;
 use crate::types::cfs::cfs_configuration_details::LayerDetails;
 use crate::types::cfs::cfs_configuration_request::CfsConfigurationRequest;
 use crate::types::cfs::cfs_configuration_response::{
@@ -8,6 +9,7 @@ use crate::types::cfs::cfs_configuration_response::{
 use crate::types::cfs::component::Component;
 use crate::types::cfs::session::CfsSessionPostRequest;
 use crate::types::ims::Image;
+use crate::types::Group;
 use crate::types::{bos::session_template::BosSessionTemplate, K8sDetails};
 use crate::{error::Error, types::cfs::session::CfsSessionGetResponse};
 
@@ -277,6 +279,25 @@ pub trait CfsTrait {
     async {
       Err(Error::Message(
         "Get CFS conponents command not implemented for this backend"
+          .to_string(),
+      ))
+    }
+  }
+
+  fn delete_and_cancel_session(
+    &self,
+    _shasta_token: &str,
+    _shasta_base_url: &str,
+    _shasta_root_cert: &[u8],
+    _group_available_vec: &[Group],
+    _cfs_session: &CfsSessionGetResponse,
+    _cfs_component_vec: &[Component],
+    _bss_bootparameters_vec: &[BootParameters],
+    _dry_run: bool,
+  ) -> impl Future<Output = Result<(), Error>> + Send {
+    async {
+      Err(Error::Message(
+        "Delete and cancel session command not implemented for this backend"
           .to_string(),
       ))
     }
