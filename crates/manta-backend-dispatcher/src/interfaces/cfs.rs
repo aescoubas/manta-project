@@ -12,6 +12,7 @@ use crate::types::ims::Image;
 use crate::types::Group;
 use crate::types::{bos::session_template::BosSessionTemplate, K8sDetails};
 use crate::{error::Error, types::cfs::session::CfsSessionGetResponse};
+use chrono::NaiveDateTime;
 
 pub trait CfsTrait {
   type T: futures_io::AsyncBufRead + Send + Sized;
@@ -162,6 +163,8 @@ pub trait CfsTrait {
     _configuration_name: Option<&str>,
     _configuration_name_pattern: Option<&str>,
     _hsm_group_name_vec: &[String],
+    _since_opt: Option<NaiveDateTime>,
+    _until_opt: Option<NaiveDateTime>,
     _limit_number_opt: Option<&u8>,
   ) -> impl Future<Output = Result<Vec<CfsConfigurationResponse>, Error>> + Send
   {
