@@ -1,4 +1,5 @@
-FROM rust:1.86.0-slim-bookworm AS builder
+FROM rust:1.86.0-bookworm AS builder
+#FROM rust:1.86.0-slim-bookworm AS builder
 # Install cmake for building the `librdkafka` crate statically
 RUN apt-get update && apt-get install -y --no-install-recommends cmake
 WORKDIR /usr/src/manta-ws
