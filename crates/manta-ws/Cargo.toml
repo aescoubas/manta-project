@@ -5,6 +5,10 @@ version = "0.1.21"
 edition = "2024"
 publish = false
 
+[package.metadata.release]
+verify = false
+pre-release-hook = ["cargo", "publish", "--dry-run", "--locked"]
+
 [profile.release]
 opt-level = 'z'     # Optimize for size
 lto = true          # Enable link-time optimization
