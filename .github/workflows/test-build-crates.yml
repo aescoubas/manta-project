@@ -18,7 +18,7 @@ on:
   push:
     branches:
       - 'main'
-        #- 'staging'
+      - 'staging'
     tags:
       - 'manta-v*'
       - 'manta-ws-v*'
@@ -287,7 +287,7 @@ jobs:
           path: target/release/${{ matrix.crate.name }}
 
   cargo_release:
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
     needs: [changed_files, build_crates_workspace]
     runs-on: ubuntu-latest
     outputs:
@@ -300,27 +300,27 @@ jobs:
             path: crates/manta
             output_prefix: manta
             condition: ${{ needs.changed_files.outputs.manta_any_changed == 'true' }}
-            tag_prefix: manta-v
+            tag_prefix: manta-
           - name: manta-backend-dispatcher
             path: crates/manta-backend-dispatcher
             output_prefix: manta_backend_dispatcher
             condition: ${{ needs.changed_files.outputs.manta_backend_dispatcher_any_changed == 'true' }}
-            tag_prefix: manta-backend-dispatcher-v
+            tag_prefix: manta-backend-dispatcher-
           - name: manta-ws
             path: crates/manta-ws
             output_prefix: manta_ws
             condition: ${{ needs.changed_files.outputs.manta_ws_any_changed == 'true' }}
-            tag_prefix: manta-ws-v
+            tag_prefix: manta-ws-
           - name: ochami-rs
             path: crates/ochami-rs
             output_prefix: ochami_rs
             condition: ${{ needs.changed_files.outputs.ochami_rs_any_changed == 'true' }}
-            tag_prefix: ochami-rs-v
+            tag_prefix: ochami-rs-
           - name: csm-rs
             path: crates/csm-rs
             output_prefix: csm_rs
             condition: ${{ needs.changed_files.outputs.csm_rs_any_changed == 'true' }}
-            tag_prefix: csm-rs-v
+            tag_prefix: csm-rs-
     steps:
       - name: Checkout code
         if: ${{ matrix.crate.condition }}
@@ -357,23 +357,32 @@ jobs:
         run: |
           cd ${{ matrix.crate.path }}
           git-cliff --config ../../cliff.toml --tag ${{ steps.cargo-version.outputs.version }} -o CHANGELOG.md
-          if git diff --quiet CHANGELOG.md; then
-            echo "changes=false" >> $GITHUB_OUTPUT
+
+          #git diff CHANGELOG.md
+
+          if git diff --exit-code --quiet CHANGELOG.md; then
+            echo "NO changes to Changelog detected"
           else
-            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes to Changelog detected"
+            git config user.name "GitHub Actions"
+            git config user.email "actions@github.com"
+            #git add ${{ matrix.crate.path }}/CHANGELOG.md
+            git add ./CHANGELOG.md
+            git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.cargo-version.outputs.version }} [skip ci]"
+            git push
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit changelog
-        if: ${{ matrix.crate.condition }} && steps.generate.outputs.changes == 'true'
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add ${{ matrix.crate.path }}/CHANGELOG.md
-          git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.cargo-version.outputs.version }} [skip ci]"
-          git push
-
+            #
+            #      - name: Commit changelog
+            #        if: ${{ matrix.crate.condition }} #&& steps.generate.outputs.changes == 'true'
+            #        run: |
+            #          git config user.name "GitHub Actions"
+            #          git config user.email "actions@github.com"
+            #          git add ${{ matrix.crate.path }}/CHANGELOG.md
+            #          git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.cargo-version.outputs.version }} [skip ci]"
+            #          git push
+             
       - name: Configure git
         if: ${{ matrix.crate.condition }}
         run: |
@@ -385,7 +394,8 @@ jobs:
         id: run-release
         run: |
           cd ${{ matrix.crate.path }}
-          echo "cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.tag_prefix }} patch"
+          #echo "cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.crate.tag_prefix }} patch"
+          cargo release patch --no-confirm --no-publish --execute --tag-prefix ${{ matrix.crate.tag_prefix }} 
           # Store the tag name
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
@@ -399,7 +409,7 @@ jobs:
           echo "tag_name=${{ steps.run-release.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
   github_release:
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
     needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
@@ -457,7 +467,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             
   build_publish_container_image:
-    if: github.ref == 'refs/heads/main'
+    #if: github.ref == 'refs/heads/main'
     needs: [build_crates_workspace, cargo_release]
     runs-on: ubuntu-latest
     strategy:
@@ -483,6 +493,7 @@ jobs:
       - name: Podman build for ${{ matrix.crate.name }}
         if: needs.cargo_release.outputs.tag_name != '' && startsWith(needs.cargo_release.outputs.tag_name, matrix.crate.tag_prefix)
         run: |
+            cd crates/${{ matrix.crate.name }}
             podman build -t ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }} .
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
