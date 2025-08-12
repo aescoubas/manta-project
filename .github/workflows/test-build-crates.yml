@@ -285,7 +285,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.crate.name }}-binary
-          path: crates/{{ matrix.crate.name}}/target/release/${{ matrix.crate.name }}
+          path: crates/${{ matrix.crate.name}}/target/release/${{ matrix.crate.name }}
 
   cargo_release:
     #if: github.ref == 'refs/heads/main'
