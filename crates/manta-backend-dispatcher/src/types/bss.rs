@@ -35,7 +35,7 @@ impl BootParameters {
 
   /// Returns the image id. This function may fail since it assumes kernel path has the following
   // FIXME: Change function signature so it returns a Result<String, Error> instead of String
-  pub fn get_boot_image(&self) -> String {
+  pub fn get_boot_image_id(&self) -> String {
     let params: HashMap<&str, &str> = self
       .params
       .split_whitespace()
@@ -50,7 +50,7 @@ impl BootParameters {
     // NOTE: CN nodes have UIID image id in 'root' kernel parameter
     // Get `root` kernel parameter and split it by '/'
     let root_kernel_param_opt = params.get("root");
-    // NOTE: CN nodes have UIID image id in 'metal.server' kernel parameter
+    // NOTE: NCN nodes have UIID image id in 'metal.server' kernel parameter
     // Get `root` kernel parameter and split it by '/'
     let metal_server_kernel_param_opt = params.get("metal.server");
 
@@ -66,20 +66,33 @@ impl BootParameters {
       };
 
     boot_image_id_opt.unwrap_or("").to_string()
+  }
 
-    /* let mut path_elem_vec = self.kernel.split("/").skip(3);
+  pub fn get_boot_image_etag(&self) -> String {
+    let params: HashMap<&str, &str> = self
+      .params
+      .split_whitespace()
+      .map(|kernel_param| {
+        kernel_param
+          .split_once('=')
+          .map(|(key, value)| (key.trim(), value.trim()))
+          .unwrap_or((kernel_param, ""))
+      })
+      .collect();
 
-    let mut image_id: String = path_elem_vec.next().unwrap_or_default().to_string();
+    // NOTE: CN nodes have UIID image id in 'root' kernel parameter
+    // Get `root` kernel parameter and split it by '/'
+    let nmd_data_kernel_param_opt = params.get("nmd_data");
 
-    for path_elem in path_elem_vec {
-        if !path_elem.eq("kernel") {
-            image_id = format!("{}/{}", image_id, path_elem);
-        } else {
-            break;
-        }
+    if let Some(nmd_data) = nmd_data_kernel_param_opt {
+      let nmd_data_vec = nmd_data.split("=").collect::<Vec<&str>>();
+
+      if nmd_data_vec.get(1).is_some() {
+        return nmd_data_vec[1].to_string();
+      }
     }
 
-    image_id */
+    return "".to_string();
   }
 
   /// Update boot image in kernel boot parameters and also in kernel and initrd fields if
@@ -91,6 +104,7 @@ impl BootParameters {
   pub fn update_boot_image(
     &mut self,
     new_image_id: &str,
+    new_etag: &str,
   ) -> Result<bool, Error> {
     let mut changed = false;
     // replace image id in 'root' kernel param
@@ -106,22 +120,18 @@ impl BootParameters {
 
     // NOTE: CN nodes have UIID image id in 'root' kernel parameter
     // Get `root` kernel parameter and split it by '/'
-    let root_kernel_param_rslt = params.get("root");
+    let root_kernel_param = params.get("root").ok_or_else(|| {
+      Error::Message(
+        "ERROR - The 'root' kernel param is missing from user input"
+          .to_string(),
+      )
+    })?;
 
-    let mut root_kernel_param: Vec<&str> = match root_kernel_param_rslt {
-      Some(root_kernel_param) => {
-        root_kernel_param.split("/").collect::<Vec<&str>>()
-      }
-      None => {
-        return Err(Error::Message(
-          "ERROR - The 'root' kernel param is missing from user input"
-            .to_string(),
-        ));
-      }
-    };
+    let mut root_kernel_param_vec: Vec<&str> =
+      root_kernel_param.split("/").collect::<Vec<&str>>();
 
     // Replace image id in root kernel param with new image id
-    for current_image_id in &mut root_kernel_param {
+    for current_image_id in &mut root_kernel_param_vec {
       // Look for any substring between '/' that matches an UUID formant and take it as
       // the image id
       if uuid::Uuid::try_parse(current_image_id).is_ok() {
@@ -134,7 +144,18 @@ impl BootParameters {
     }
 
     // Create new `root` kernel param string
-    let new_root_kernel_param = root_kernel_param.join("/");
+    let new_root_kernel_param = root_kernel_param_vec.join("/");
+
+    let mut root_kernel_param_vec =
+      new_root_kernel_param.split(":").collect::<Vec<&str>>();
+
+    // Replace etag to the end of the `root` kernel parameter
+    if root_kernel_param_vec.get(1).is_some() {
+      root_kernel_param_vec[3] = new_etag;
+    }
+
+    // Create new `root` kernel param string
+    let new_root_kernel_param = root_kernel_param_vec.join(":");
 
     // Create new kernel parameters
     params
@@ -142,8 +163,6 @@ impl BootParameters {
       .and_modify(|root_param| *root_param = &new_root_kernel_param);
 
     self.update_kernel_param("root", &new_root_kernel_param);
-
-    // replace image id in 'nmd_data' kernel param
 
     // convert kernel params to a hashmap
     let mut params: HashMap<&str, &str> = self
@@ -188,19 +207,30 @@ impl BootParameters {
     } else {
     };
 
-    // NOTE: NCN nodes have UUID image id 'nmd_data' kernel parameter
-    let mut nmd_kernel_param: Vec<&str>;
-    if let Some(nmd_data) = params.get("nmd_data") {
-      nmd_kernel_param = nmd_data.split("/").collect();
+    // replace image id in 'nmd_data' kernel param
 
-      for substring in &mut nmd_kernel_param {
+    // NOTE: CN and NCN nodes have UUID image id 'nmd_data' kernel parameter
+    let mut nmd_kernel_param_vec: Vec<&str>;
+    if let Some(nmd_data) = params.get("nmd_data") {
+      nmd_kernel_param_vec = nmd_data.split("/").collect();
+
+      for substring in &mut nmd_kernel_param_vec {
         if uuid::Uuid::try_parse(substring).is_ok() {
           *substring = new_image_id;
           changed = true;
         }
       }
 
-      let new_nmd_kernel_param = nmd_kernel_param.join("/");
+      let new_nmd_kernel_param = nmd_kernel_param_vec.join("/");
+
+      // Replace etag to the end of the `root` kernel parameter
+      let mut nmd_kernel_param_vec =
+        new_nmd_kernel_param.split("=").collect::<Vec<&str>>();
+      if nmd_kernel_param_vec.get(1).is_some() {
+        nmd_kernel_param_vec[2] = new_etag;
+      }
+
+      let new_nmd_kernel_param = nmd_kernel_param_vec.join("=");
 
       params
         .entry("nmd_data")
