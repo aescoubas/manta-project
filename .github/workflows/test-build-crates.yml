@@ -228,6 +228,30 @@ jobs:
     needs: [changed_files, build_crates]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+          - name: manta-backend-dispatcher
+            path: crates/manta-backend-dispatcher
+            output_prefix: manta_backend_dispatcher
+            tag_prefix: manta-backend-dispatcher-
+          - name: manta-ws
+            path: crates/manta-ws
+            output_prefix: manta_ws
+            tag_prefix: manta-ws-
+          - name: ochami-rs
+            path: crates/ochami-rs
+            output_prefix: ochami_rs
+            tag_prefix: ochami-rs-
+          - name: csm-rs
+            path: crates/csm-rs
+            output_prefix: csm_rs
+            tag_prefix: csm-rs-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -244,7 +268,8 @@ jobs:
         run: cargo install release-plz --locked
 
       - name: Run release-plz release-pr
-        run: release-plz release-pr --git-token $GITHUB_TOKEN
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        run: cd ${{ matrix.crate.path }} && release-plz release-pr --git-token "$GITHUB_TOKEN"
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
@@ -252,6 +277,30 @@ jobs:
     needs: [changed_files, build_crates]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+          - name: manta-backend-dispatcher
+            path: crates/manta-backend-dispatcher
+            output_prefix: manta_backend_dispatcher
+            tag_prefix: manta-backend-dispatcher-
+          - name: manta-ws
+            path: crates/manta-ws
+            output_prefix: manta_ws
+            tag_prefix: manta-ws-
+          - name: ochami-rs
+            path: crates/ochami-rs
+            output_prefix: ochami_rs
+            tag_prefix: ochami-rs-
+          - name: csm-rs
+            path: crates/csm-rs
+            output_prefix: csm_rs
+            tag_prefix: csm-rs-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -267,7 +316,8 @@ jobs:
         run: cargo install release-plz --locked
 
       - name: Run release-plz release
-        run: release-plz release --forge github
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        run: cd ${{ matrix.crate.path }} && release-plz release --forge github
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
