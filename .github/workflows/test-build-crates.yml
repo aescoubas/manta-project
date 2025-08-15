@@ -226,7 +226,7 @@ jobs:
 
   release_pr:
     needs: [changed_files, build_crates]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'release-plz')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -390,7 +390,7 @@ jobs:
 
   build_publish_container_image:
     needs: [changed_files, release]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_ws_any_changed == 'true'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_ws_any_changed == 'true' && contains(github.event.head_commit.message, 'release-plz')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
