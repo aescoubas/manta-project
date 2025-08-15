@@ -260,6 +260,7 @@ jobs:
           token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Install Rust
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
@@ -308,11 +309,13 @@ jobs:
           token: ${{ secrets.RELEASE_TOKEN }}
 
       - name: Install Rust
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
 
       - name: Install release-plz
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: cargo install release-plz --locked
 
       - name: Run release-plz release
