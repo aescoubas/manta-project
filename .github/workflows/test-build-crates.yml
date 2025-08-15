@@ -275,9 +275,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
+  # trigger only on release-plz
   release:
     needs: [changed_files, build_crates]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'release-plz')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -321,7 +322,7 @@ jobs:
 
       - name: Run release-plz release
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-        run: cd ${{ matrix.crate.path }} && release-plz release --forge github --git-token $GITHUB_TOKEN
+        run: cd ${{ matrix.crate.path }} && release-plz release --forge github --git-token $GITHUB_TOKEN --config ../../release-plz.toml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
