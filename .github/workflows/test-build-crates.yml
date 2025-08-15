@@ -1,27 +1,13 @@
 name: Check changed files and release
 
-env: 
+env:
   CONTAINER_REGISTRY: ghcr.io  # GitHub Container Registry
 
 on:
-  workflow_dispatch:
-    inputs:
-      release_level:
-        description: 'Release level'
-        required: true
-        type: choice
-        default: 'patch'
-        options:
-          - patch
-          - minor
-          - major
   push:
     branches:
       - 'main'
       - 'staging'
-    tags:
-      - 'manta-v*'
-      - 'manta-ws-v*'
     paths:
       - 'crates/**'
       - 'Cargo.toml'
@@ -37,6 +23,7 @@ on:
 
 permissions:
   contents: write  # Required for creating releases, committing changes, and pushing tags
+  pull-requests: write  # Required for creating/updating pull requests
 
 jobs:
   changed_files:
@@ -109,20 +96,10 @@ jobs:
           toolchain: stable
           components: rustfmt
 
-            #      - name: Cache Cargo
-            #        uses: actions/cache@v4
-            #        with:
-            #          path: |
-            #            ~/.cargo/registry
-            #            ~/.cargo/git
-            #            target
-            #          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-            #          restore-keys: ${{ runner.os }}-cargo-
-            #
       - name: Check formatting for ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          echo "cd ${{ matrix.crate.path }} && cargo fmt --check"
+          cd ${{ matrix.crate.path }} && cargo fmt --check
 
   lint:
     name: Lint Rust code with Clippy
@@ -158,20 +135,10 @@ jobs:
           toolchain: stable
           components: clippy
 
-            #      - name: Cache Cargo
-            #        uses: actions/cache@v4
-            #        with:
-            #          path: |
-            #            ~/.cargo/registry
-            #            ~/.cargo/git
-            #            target
-            #          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-            #          restore-keys: ${{ runner.os }}-cargo-
-
       - name: Run Clippy for ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          echo "cd ${{ matrix.crate.path }} && cargo clippy -- -D warnings"
+          cd ${{ matrix.crate.path }} && cargo clippy -- -D warnings
 
   test_crates:
     name: Test Rust crates
@@ -206,22 +173,12 @@ jobs:
         with:
           toolchain: stable
 
-            #      - name: Cache Cargo
-            #        uses: actions/cache@v4
-            #        with:
-            #          path: |
-            #            ~/.cargo/registry
-            #            ~/.cargo/git
-            #            target
-            #          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-            #          restore-keys: ${{ runner.os }}-cargo-
-
       - name: Test ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
-          echo "cd ${{ matrix.crate.path }} && cargo test"
+          cd ${{ matrix.crate.path }} && cargo test
 
-  build_crates_workspace:
+  build_crates:
     needs: [changed_files, check_formatting, lint, test_crates]
     runs-on: ubuntu-latest
     strategy:
@@ -253,46 +210,73 @@ jobs:
         with:
           toolchain: stable
 
-            #      - name: Cache Cargo
-            #        uses: actions/cache@v4
-            #        with:
-            #          path: |
-            #            ~/.cargo/registry
-            #            ~/.cargo/git
-            #            target
-            #          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-            #          restore-keys: ${{ runner.os }}-cargo-
-
-#      - name: Debug condition
-#        env:
-#          debug_1: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] }}
-#          debug_2: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-#        run: |
-#          echo $debug_1
-#          echo $debug_2
-
       - name: Build ${{ matrix.crate.name }}
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: |
           cargo --version
           rustc --version
-          #cargo build -p ${{ matrix.crate.name }} --release
-          cd crates/${{ matrix.crate.name }} 
-          cargo build --locked --manifest-path Cargo.toml  --release
+          cd ${{ matrix.crate.path }} 
+          cargo build --locked --manifest-path Cargo.toml --release
 
       - name: Upload artifacts
-        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.crate.name }}-binary
-          path: crates/${{ matrix.crate.name}}/target/release/${{ matrix.crate.name }}
+          path: ${{ matrix.crate.path }}/target/release/${{ matrix.crate.name }}
 
-  cargo_release:
-    #if: github.ref == 'refs/heads/main'
-    needs: [changed_files, build_crates_workspace]
+  release_pr:
+    needs: [changed_files, build_crates]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
-    outputs:
-      tag_name: ${{ steps.set-tag.outputs.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Install release-plz
+        run: cargo install release-plz --locked
+
+      - name: Run release-plz release-pr
+        run: release-plz release-pr --base-branch main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: [changed_files, build_crates]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Install release-plz
+        run: cargo install release-plz --locked
+
+      - name: Run release-plz release
+        run: release-plz release --forge github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  attach_assets:
+    needs: [changed_files, release]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -300,201 +284,86 @@ jobs:
           - name: manta
             path: crates/manta
             output_prefix: manta
-            condition: ${{ needs.changed_files.outputs.manta_any_changed == 'true' }}
             tag_prefix: manta-
           - name: manta-backend-dispatcher
             path: crates/manta-backend-dispatcher
             output_prefix: manta_backend_dispatcher
-            condition: ${{ needs.changed_files.outputs.manta_backend_dispatcher_any_changed == 'true' }}
             tag_prefix: manta-backend-dispatcher-
           - name: manta-ws
             path: crates/manta-ws
             output_prefix: manta_ws
-            condition: ${{ needs.changed_files.outputs.manta_ws_any_changed == 'true' }}
             tag_prefix: manta-ws-
           - name: ochami-rs
             path: crates/ochami-rs
             output_prefix: ochami_rs
-            condition: ${{ needs.changed_files.outputs.ochami_rs_any_changed == 'true' }}
             tag_prefix: ochami-rs-
           - name: csm-rs
             path: crates/csm-rs
             output_prefix: csm_rs
-            condition: ${{ needs.changed_files.outputs.csm_rs_any_changed == 'true' }}
             tag_prefix: csm-rs-
     steps:
-      - name: Checkout code
-        if: ${{ matrix.crate.condition }}
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}  # Required for pushing changes
 
-      - name: Install Rust
-        if: ${{ matrix.crate.condition }}
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-
-      - name: Install cargo-release
-        if: ${{ matrix.crate.condition }}
-        run: cargo install cargo-release --locked
-
-      - name: Install git-cliff
-        if: ${{ matrix.crate.condition }}
-        run: cargo install git-cliff --locked
-
-      - name: Get Cargo version
-        if: ${{ matrix.crate.condition }}
-        id: cargo-version
+      - name: Get version
+        id: get_version
         run: |
           cd ${{ matrix.crate.path }}
-          VERSION=$(grep '^version' Cargo.toml | head -n1 | cut -d'"' -f2)
+          VERSION=$(grep '^version =' Cargo.toml | head -n1 | cut -d '"' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Generate 'CHANGELOG'.md
-        if: ${{ matrix.crate.condition }}
-        id: generate
-        run: |
-          cd ${{ matrix.crate.path }}
-          git-cliff --config ../../cliff.toml --tag ${{ steps.cargo-version.outputs.version }} -o CHANGELOG.md
-
-          #git diff CHANGELOG.md
-
-          if git diff --exit-code --quiet CHANGELOG.md; then
-            echo "NO changes to Changelog detected"
-          else
-            echo "Changes to Changelog detected"
-            git config user.name "GitHub Actions"
-            git config user.email "actions@github.com"
-            #git add ${{ matrix.crate.path }}/CHANGELOG.md
-            git add ./CHANGELOG.md
-            git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.cargo-version.outputs.version }} [skip ci]"
-            git push
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            #
-            #      - name: Commit changelog
-            #        if: ${{ matrix.crate.condition }} #&& steps.generate.outputs.changes == 'true'
-            #        run: |
-            #          git config user.name "GitHub Actions"
-            #          git config user.email "actions@github.com"
-            #          git add ${{ matrix.crate.path }}/CHANGELOG.md
-            #          git commit -m "chore: update CHANGELOG.md for ${{ matrix.crate.name }} v${{ steps.cargo-version.outputs.version }} [skip ci]"
-            #          git push
-             
-      - name: Configure git
-        if: ${{ matrix.crate.condition }}
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-
-      - name: Run cargo-release for ${{ matrix.crate.name }}
-        if: ${{ matrix.crate.condition }}
-        id: run-release
-        run: |
-          cd ${{ matrix.crate.path }}
-          #echo "cargo release -p ${{ matrix.crate.name }} --no-confirm --no-publish --execute --tag-prefix ${{ matrix.crate.tag_prefix }} patch"
-          cargo release patch --no-confirm --no-publish --execute --tag-prefix ${{ matrix.crate.tag_prefix }} 
-          # Store the tag name
-          TAG_NAME=$(git describe --tags --abbrev=0)
-          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set tag name output
-        id: set-tag
-        if: ${{ matrix.crate.condition }}
-        run: |
-          echo "tag_name=${{ steps.run-release.outputs.tag_name }}" >> $GITHUB_OUTPUT
-
-  github_release:
-    #if: github.ref == 'refs/heads/main'
-    needs: [build_crates_workspace, cargo_release]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        crate:
-          - name: manta
-            output_prefix: manta
-            artifact_name: manta-binary
-            tag_prefix: manta-v
-          - name: manta-backend-dispatcher
-            output_prefix: manta_backend_dispatcher
-            artifact_name: manta-backend-dispatcher-binary
-            tag_prefix: manta-backend-dispatcher-v
-          - name: manta-ws
-            output_prefix: manta_ws
-            artifact_name: manta-ws-binary
-            tag_prefix: manta-ws-v
-          - name: ochami-rs
-            output_prefix: ochami_rs
-            artifact_name: ochami-rs-binary
-            tag_prefix: ochami-rs-v
-          - name: csm-rs
-            output_prefix: csm_rs
-            artifact_name: csm-rs-binary
-            tag_prefix: csm-rs-v
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - name: Set tag
+        id: set_tag
+        run: echo "tag=${{ matrix.crate.tag_prefix }}v${{ steps.get_version.outputs.version }}" >> $GITHUB_OUTPUT
 
       - name: Download artifact for ${{ matrix.crate.name }}
-        if: needs.cargo_release.outputs.tag_name != '' && startsWith(needs.cargo_release.outputs.tag_name, matrix.crate.tag_prefix)
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: ${{ matrix.crate.artifact_name }}
+          name: ${{ matrix.crate.name }}-binary
           path: artifacts/
 
-      - name: Create Release for ${{ matrix.crate.name }}
-        if: needs.cargo_release.outputs.tag_name != '' && startsWith(needs.cargo_release.outputs.tag_name, matrix.crate.tag_prefix)
+      - name: Attach binary to release for ${{ matrix.crate.name }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.cargo_release.outputs.tag_name }}
-          name: ${{ matrix.crate.name }} Release ${{ needs.cargo_release.outputs.tag_name }}
-          body: |
-            Release for ${{ matrix.crate.name }} ${{ needs.cargo_release.outputs.tag_name }}.
-            Changes in this release:
-            - See commit history or CHANGELOG.md for details.
-          draft: false
-          prerelease: false
+          tag_name: ${{ steps.set_tag.outputs.tag }}
           files: |
             artifacts/${{ matrix.crate.name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            
+
   build_publish_container_image:
-    #if: github.ref == 'refs/heads/main'
-    needs: [build_crates_workspace, cargo_release]
+    needs: [changed_files, release]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_ws_any_changed == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        crate:
-          - name: manta-ws
-            output_prefix: manta_ws
-            artifact_name: manta-ws-binary
-            tag_prefix: manta-ws-v
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
-      
+
       - name: Check Podman version
         run: podman version
 
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | podman login ${{ env.CONTAINER_REGISTRY }} -u ${{ github.actor }} --password-stdin
 
-      - name: Podman build for ${{ matrix.crate.name }}
-        if: needs.cargo_release.outputs.tag_name != '' && startsWith(needs.cargo_release.outputs.tag_name, matrix.crate.tag_prefix)
+      - name: Get version for manta-ws
+        id: get_version
         run: |
-            cd crates/${{ matrix.crate.name }}
-            podman build -t ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/${{ matrix.crate.name }}:${{ needs.cargo_release.outputs.tag_name }} .
+          cd crates/manta-ws
+          VERSION=$(grep '^version =' Cargo.toml | head -n1 | cut -d '"' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set tag
+        id: set_tag
+        run: echo "tag=manta-ws-v${{ steps.get_version.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Podman build for manta-ws
+        run: |
+          cd crates/manta-ws
+          podman build -t ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/manta-ws:${{ steps.set_tag.outputs.tag }} .
+          podman push ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/manta-ws:${{ steps.set_tag.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
