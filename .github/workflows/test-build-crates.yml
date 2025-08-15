@@ -1,4 +1,3 @@
-```yaml
 name: Check changed files and release
 
 env:
@@ -367,4 +366,3 @@ jobs:
           podman push ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/manta-ws:${{ steps.set_tag.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
