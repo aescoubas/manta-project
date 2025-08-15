@@ -266,6 +266,7 @@ jobs:
           toolchain: stable
 
       - name: Install release-plz
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
         run: cargo install release-plz --locked
 
       - name: Run release-plz release-pr
@@ -320,7 +321,7 @@ jobs:
 
       - name: Run release-plz release
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-        run: cd ${{ matrix.crate.path }} && release-plz release --forge github
+        run: cd ${{ matrix.crate.path }} && release-plz release --forge github --git-token $GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
