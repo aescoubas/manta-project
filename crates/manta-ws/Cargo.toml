@@ -1,7 +1,7 @@
 [package]
 name = "manta-ws"
 description = "HTTP server for Mesa"
-version = "0.1.21"
+version = "0.1.20"
 edition = "2024"
 publish = true
 
@@ -63,8 +63,12 @@ chrono = "0.4.41"
 rdkafka = { version = "0.37", features = ["cmake-build"] }
 utoipa = { version = "5.3.1" }
 
+
+
 [profile.dev]
 incremental = true
+
+
 
 
 
