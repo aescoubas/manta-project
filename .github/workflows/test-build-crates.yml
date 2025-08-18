@@ -271,7 +271,7 @@ jobs:
         run: |
           mkdir -p ~/.cargo/bin
           curl -L https://github.com/MarcoIeni/release-plz/releases/latest/download/release-plz-x86_64-unknown-linux-gnu.tar.gz -o ~/.cargo/bin/release-plz.tar.gz
-          tar -xzf release-plz.tar.gz
+          tar -xzf ~/.cargo/bin/release-plz.tar.gz -C ~/.cargo/bin/
           echo "~/.cargo/bin" >> $GITHUB_PATH
 
       - name: Run release-plz release-pr
