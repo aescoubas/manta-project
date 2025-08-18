@@ -7,6 +7,229 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.21](https://github.com/aescoubas/manta-project/releases/tag/v0.1.21) - 2025-08-18
+
+### Added
+
+- power-status
+- add endpoints related to redfish endpoints
+- add new functionality to delete boot parameters
+- add endpoints for BSS to create and get entities
+- clean and update power management commands
+- fix CID pipeline
+- add gitlab pipeline
+- add option to create hsm group when migrating nodes
+- add new endpoint to check cama version
+- new endpoint to migrate nodes between hsm groups
+- test PUT with url and query params
+- update mesa version
+- update cama version
+- add new endpoint to check CFS service health
+- add cfs configuration used to build image when listing nodes configuration related to a HSM group
+- add new features to manage nodes power state
+- start login page
+- add frontend
+
+### Fixed
+
+- change keyworkd "ref" -> "branch" in Cargo.toml
+- reference projects git repositories
+- update function to create a redfish endpoint to accept same struct as the backend dispatcher
+- handlers to return struct that implements IntoResponse
+- websockets connecting to node's console
+- websockets connecting to node's console
+- clean code
+- get /hsm
+- bring missing changes from gitlab
+- previous mistake in how to skip ci run [skip ci]
+- wrong year for Cargo
+- add the proper version in Cargo.toml and retag the appropriate commit
+- update gitlab pipeline
+- update gitlab pipeline
+- update backend libraries
+- set exact mesa version in Cargo.toml
+- install cmake to compile librdkafka create
+- compilation errors after upgrade mesa version
+- Dockerfile
+- cfs logs
+- *(cicd)* git runner tags
+- *(cicd)* git runner tags
+- *(cicd)* git runner tags
+- *(cicd)* git runner tags
+- fix merge issues
+- install script not deploying properly
+- server listens to any address
+- code fixes
+- fix bug with xterm not being able to handle TTY echo off from remote
+
+### Other
+
+- Feat/feature ([#23](https://github.com/aescoubas/manta-project/pull/23))
+- test
+- release v0.1.19
+- test
+- test
+- release v0.1.20
+- test
+- test
+- test
+- release v0.1.21
+- staging
+- staging
+- staging
+- staging
+- staging
+- staging
+- staging
+- test
+- update CHANGELOG.md for manta-ws v0.1.21 [skip ci]
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- Release manta-ws version 0.1.22
+- test
+- Release manta-ws version 0.1.21
+- test
+- Release manta-ws version 0.1.20
+- Release manta-ws version 0.1.19
+- test
+- test
+- Release manta-ws version 0.1.18
+- test
+- test
+- Release manta-ws version 0.1.17
+- test
+- test
+- Release manta-ws version 0.1.16
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- update CHANGELOG.md for manta-ws v0.1.15 [skip ci]
+- test
+- test
+- test
+- test
+- correct manta-ws with Cargo.lock
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- test
+- migration to monorepo
+- update CHANGELOG.md for v0.1.14
+- Release manta-ws version 0.1.14
+- update Cargo.toml
+- clean code
+- update CHANGELOG.md for v0.1.13
+- Release manta-ws version 0.1.13
+- update CHANGELOG.md for v0.1.12
+- Release manta-ws version 0.1.12
+- update CHANGELOG.md for v0.1.11
+- Release manta-ws version 0.1.11
+- Release manta-ws version 0.1.10
+- update CHANGELOG.md for v0.1.9
+- Release manta-ws version 0.1.9
+- Release manta-ws version 0.1.8
+- get/post boot parameters
+- clean code
+- clean code
+- update CHANGELOG.md for v0.1.7
+- Merge pull request #19 from t-h2o/improve-dockerfile
+- Merge pull request #20 from eth-cscs/feature/auto-changelog
+- Release manta-ws version 0.1.7
+- Release manta-ws version 0.1.6
+- Release manta-ws version 0.1.5
+- clean code
+- Release manta-ws version 0.1.4
+- cargo fix
+- Merge pull request #18 from eth-cscs/fix/pipeline-tests
+- Merge branch 'main' into fix/dependencies
+- Release manta-ws version 0.1.3
+- Merge pull request #16 from eth-cscs/feature/openapi
+- code documentation
+- Add details on pipeline in README.md
+- Rename project from "cama" to "manta-ws" ([#15](https://github.com/aescoubas/manta-project/pull/15))
+- Dev ([#14](https://github.com/aescoubas/manta-project/pull/14))
+- update Cargo.toml
+- update rust builder container image version
+- update Cargo.toml
+- rename application from manta-ws to api-server
+- test build container image in gitlab pipeline
+- test build container image in gitlab pipeline
+- test build container image in gitlab pipeline
+- test build container image in gitlab pipeline
+- Update .gitlab-ci.yml file
+- release v0.1.1
+- trying to use more idiomatic Rust code
+- Closes #9 - Create functionality to get kernel parameters
+- Feature required to compile on my laptop
+- fix tokio features
+- improve installation script
+- Merge pull request #8 from eth-cscs/1-feature-create-endpoint-to-check-if-bos-service-is-ready
+- update README
+- whoami endpoint returning string rather than printing on the server stdout
+- add command to test http request in README
+- fix README issues
+- house keeping
+- house keeping
+- adapt to mesa code
+- adapt to new mesa code
+- clean files and update README
+- add license file
+- increase buffer/scrollback size and disable linewrap
+- change tab title and clean code
+- clean frontend files
+- initial commit with cfs session logs and xname console features
+- init
+
 ## [0.1.19](https://github.com/aescoubas/manta-project/releases/tag/v0.1.19) - 2025-08-15
 
 ### Added
