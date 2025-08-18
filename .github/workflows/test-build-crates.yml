@@ -276,7 +276,7 @@ jobs:
 
       - name: Run release-plz release-pr
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-        run: cd ${{ matrix.crate.path }} && release-plz release-pr --git-token "$GITHUB_TOKEN"
+        run: cd ${{ matrix.crate.path }} && release-plz release-pr --git-token "$GITHUB_TOKEN" --config ../../release-plz.toml
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
