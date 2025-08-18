@@ -64,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Other
 
+<<<<<<< Updated upstream
 - release v0.1.19 ([#27](https://github.com/aescoubas/manta-project/pull/27))
 - release v0.1.19 ([#26](https://github.com/aescoubas/manta-project/pull/26))
 - test
@@ -527,6 +528,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Other
 
+=======
+- test
+>>>>>>> Stashed changes
 - test
 - test
 - test
