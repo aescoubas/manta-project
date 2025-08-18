@@ -270,10 +270,9 @@ jobs:
         #run: cargo install release-plz --locked
         run: |
           mkdir -p ~/.cargo/bin
-          curl -L https://github.com/MarcoIeni/release-plz/releases/latest/download/release-plz-x86_64-unknown-linux-gnu.tar.gz -o release-plz.tar.gz
+          curl -L https://github.com/MarcoIeni/release-plz/releases/latest/download/release-plz-x86_64-unknown-linux-gnu.tar.gz -o ~/.cargo/bin/release-plz.tar.gz
           tar -xzf release-plz.tar.gz
           echo "~/.cargo/bin" >> $GITHUB_PATH
-          cd -
 
       - name: Run release-plz release-pr
         if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
