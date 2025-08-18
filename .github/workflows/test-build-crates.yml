@@ -226,7 +226,7 @@ jobs:
 
   release_pr:
     needs: [changed_files, build_crates]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'chore: release-plz')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'release-plz')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -283,7 +283,7 @@ jobs:
   # trigger only on release-plz
   release:
     needs: [changed_files, build_crates]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'chore: release-plz')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'release-plz')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
