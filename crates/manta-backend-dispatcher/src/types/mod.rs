@@ -6,13 +6,12 @@ pub mod ims;
 pub mod kafka;
 pub mod pcs;
 
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use strum_macros::{AsRefStr, Display, EnumIter, EnumString, IntoStaticStr};
 
-use crate::error::Error;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum K8sAuth {

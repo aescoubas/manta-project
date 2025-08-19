@@ -2,13 +2,7 @@ use std::future::Future;
 
 use chrono::NaiveDateTime;
 
-use crate::{
-  error::Error,
-  types::{
-    bss::BootParameters,
-    cfs::{component::Component, session::CfsSessionGetResponse},
-  },
-};
+use crate::error::Error;
 
 pub trait CommandsTrait {
   fn i_delete_data_related_to_cfs_configuration(
