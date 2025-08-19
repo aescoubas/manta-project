@@ -378,7 +378,11 @@ impl BootParameters {
   ///  - if kernel parameter does not exists, then it will be added,
   /// otherwise nothing will change
   /// Returns true if kernel params have change
-  pub fn add_kernel_params(&mut self, new_kernel_params: &str) -> bool {
+  pub fn add_kernel_params(
+    &mut self,
+    new_kernel_params: &str,
+    ovwerwrite: bool,
+  ) -> bool {
     let mut changed = false;
     let mut params: HashMap<&str, &str> = self
       .params
@@ -400,7 +404,17 @@ impl BootParameters {
       // NOTE: do not use --> `params.entry(key).or_insert(new_value);` otherwise, I don't know
       // how do we know if the key already exists or not
       if params.contains_key(key) {
-        log::info!("key '{}' already exists, the new kernel parameter won't be added since it already exists", key);
+        if ovwerwrite {
+          log::info!(
+            "key '{}' found but user wants to overwrite, updating value to '{}'",
+            key,
+            new_value
+          );
+          params.insert(key, new_value);
+          changed = true
+        } else {
+          log::info!("key '{}' already exists, the new kernel parameter won't be added since it already exists", key);
+        }
       } else {
         log::info!(
           "key '{}' not found, adding new kernel param with value '{}'",
