@@ -410,7 +410,7 @@ jobs:
 
   build_publish_container_image:
     needs: [changed_files, release]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_ws_any_changed == 'true' && contains(github.event.head_commit.message, 'release-plz')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_ws_any_changed == 'true' 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
