@@ -1,5 +1,5 @@
 [workspace]
-publish = false # disable `cargo publish` for `package_a`
+ publish = false # disable `cargo publish` for `package_a`
 
 pr_name = "chore: release-plz {{ package }} v{{ version }}"
 git_tag_name = "{{ package }}-v{{ version }}"
