@@ -441,3 +441,38 @@ jobs:
           podman push ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/manta-ws:${{ steps.set_tag.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+
+
+  build_homebrew_package:
+    needs: [changed_files, release]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_any_changed == 'true' 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Download artifact for manta
+        uses: actions/download-artifact@v4
+        with:
+          name: manta-binary
+          path: artifacts/
+
+      - name: Generate formula file and upload it
+        id: generate_formula_file
+        run: |
+          cd crates/manta
+          MANTA_VERSION=$(grep -E '^version *\= *"([^"]+)"' -o0 Cargo.toml  | sed -r 's/version *\= *"([^"]+)"/\1/')
+          echo "MANTA_VERSION: $MANTA_VERSION"
+
+          URL="https://github.com/aescoubas/manta-project/releases/download/manta-v${VERSION}/manta"
+          SHA=$(curl -L $URL | shasum -a 256 | cut -d ' ' -f 1)
+
+          echo "SHA: $SHA"
+
+          sed -ri "s/\{\{ *VERSION *\}\}/$MANTA_VERSION/g" manta.rb 
+          sed -ri "s/\{\{ *SHA *\}\}/$SHA/g" manta.rb 
+
+          cat manta.rb
+
+
