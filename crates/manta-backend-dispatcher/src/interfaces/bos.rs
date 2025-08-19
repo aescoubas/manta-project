@@ -90,7 +90,7 @@ pub trait ClusterSessionTrait {
     _shasta_base_url: &str,
     _shasta_root_cert: &[u8],
     _bos_session: BosSession,
-  ) -> impl Future<Output = Result<Value, Error>> + Send {
+  ) -> impl Future<Output = Result<BosSession, Error>> + Send {
     async {
       Err(Error::Message(
         "Create session template command not implemented for this backend"
