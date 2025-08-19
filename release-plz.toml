@@ -4,3 +4,6 @@ publish = false # disable `cargo publish` for `package_a`
 pr_name = "chore: release-plz {{ package }} v{{ version }}"
 git_tag_name = "{{ package }}-v{{ version }}"
 
+publish_no_verify = true
+publish_allow_dirty = true
+
