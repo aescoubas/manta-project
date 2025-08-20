@@ -1,0 +1,110 @@
+# cargo-features = ["codegen-backend"]
+# default-features = false
+
+# build = "build.rs"
+
+[package]
+edition = "2021"
+authors = ["Manuel Sopena Ballesteros <msopena@cscs.ch>", "Miguel Gila <miguel.gila@cscs.ch>"]
+name = "manta"
+description = "Another CLI for ALPS"
+version = "1.54.1-beta.181"
+license-file = "LICENSE"
+documentation = "https://github.com/eth-cscs/manta/blob/main/README.md"
+homepage = "https://github.com/eth-cscs/manta/blob/main/README.md"
+repository = "https://github.com/eth-cscs/manta"
+keywords = ["cli", "productivity"]
+publish = false # cargo dist --> Avoid publishing to crates.io
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# [build-dependencies]
+# clap = "*"
+# clap_complete = "*"
+# manta-backend-dispatcher = { path = "../backend-dispatcher" } # Only for development purposes
+# backend-dispatcher = "*"
+# strum = "*"
+# strum_macros = "*"
+
+[dependencies]
+# --- START MANTA DEPENDENCIES ---
+
+# PROD
+
+manta-backend-dispatcher = "0.4.0"
+ochami-rs = "0.1.85"
+csm-rs = "0.8.0"
+
+# DEV - Only for development purposes
+
+# manta-backend-dispatcher = { path = "../manta-backend-dispatcher" }
+# ochami-rs = { path = "../ochami-rs" }
+# csm-rs = { path = "../csm-rs" }
+
+# --- END MANTA DEPENDENCIES ---
+
+hostlist-parser = "0.1.6"
+nodeset = "0.5.0"
+strum = { version = "0.27.1", default-features = false }
+strum_macros = "0.27.1"
+chrono = { version = "0.4.41", default-features = false }
+anyhow = { version = "1.0.44", default-features = false }
+reqwest = { version = "0.12.15", default-features = false, features = ["blocking", "json", "rustls-tls", "socks"] } # We need native-tls-vendored feature to be able to compile on `musl` target
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+serde_yaml = "0.9.34"
+log = "0.4.27"
+log4rs = { version = "1.2.0", default-features = false }
+tokio = { version = "1.45", features = ["full"] }
+tokio-util = "0.7.4" # used by manta_console to create a read stream from container stdout
+kube = { version = "0.87.2", default-features = false }
+k8s-openapi = "0.20.0"
+md5 = { version = "0.7.0", default-features = false }
+uuid = { version = "1.16.0", features = ["fast-rng", "v4"] }
+git2 = { version = "0.18.1", default-features = false, features = ["vendored-openssl"] }
+dialoguer = { version = "0.11.0", default-features = false }
+indicatif = { version = "0.17.7", default-features = false }
+futures = { version = "0.3.31", default-features = false }
+toml = "0.8.16"
+toml_edit = "0.22.24" # used to edit manta configuration file
+clap = { version = "4.3.21", features = ["wrap_help"] }
+clap_complete = "4.3.2"
+substring = "1.4.5"
+regex = "1.6.0"
+directories = "4.0.1"                                                      # XDG Base Directory Specification
+comfy-table = "6.1.1"
+termion = "2.0.1"                                                          # used by manta_console to enable terminal raw and also to print text in color
+crossterm = { version = "0.27.0", default-features = false }
+humansize = "2.0.0"
+execute = "0.2.13"
+is_executable = "1.0.1"
+minijinja = { version = "2.4.0", features = ["custom_syntax"] }
+rdkafka = { version = "0.38", features = ["cmake-build"] }
+base64 = { version = "0.13.1", default-features = false }
+globset = { version = "0.4.14", default-features = false }
+config = { version = "0.13.2", features = ["toml"], default-features = false }
+
+[profile.release]
+opt-level = "s" # Tell `rustc` to optimize for small code size.
+#incremental = true
+debug = 1
+
+#[features]
+#dhat-heap = []    # if you are doing heap profiling
+#dhat-ad-hoc = []  # if you are doing ad hoc profiling
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
+
+# Config for `cargo release`
+[package.metadata.release]
+pre-release-hook = [
+  "git",
+  "cliff",
+  "-o",
+  "CHANGELOG.md",
+  "--tag",
+  "{{version}}",
+] # [Generates CHANGELOG automatically] (https://github.com/crate-ci/cargo-release/blob/master/docs/faq.md#maintaining-changelog) using [git cliff](https://github.com/orhun/git-cliff) as a dependency
