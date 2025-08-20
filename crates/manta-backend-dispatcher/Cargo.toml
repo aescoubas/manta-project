@@ -1,0 +1,29 @@
+[package]
+name = "manta-backend-dispatcher"
+version = "0.4.0"
+edition = "2021"
+license-file = "LICENSE"
+description = "Traits to be developed by Mesa backends"
+documentation = "https://github.com/eth-cscs/manta-backend-dispatcher/blob/main/README.md"
+homepage = "https://github.com/eth-cscs/manta-backend-dispatcher/blob/main/README.md"
+repository = "https://github.com/eth-cscs/manta-backend-dispatcher"
+
+[dependencies]
+reqwest = { version = "0.12.15", default-features = false, features = ["blocking", "json", "rustls-tls", "socks"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+thiserror = "2.0.12"
+log = "0.4.27"
+uuid = "1.16.0"
+strum = { version = "0.27.1", default-features = false }
+strum_macros = "0.27.1"
+futures-io = "0.3.31"
+tokio = { version = "1.45", features = ["macros", "rt-multi-thread"] }
+serde_yaml = "0.9.34"
+rdkafka = { version = "0.37", features = ["cmake-build"] }
+chrono = { version = "0.4.41", default-features = false }
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
