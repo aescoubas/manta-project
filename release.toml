@@ -1,0 +1,15 @@
+# [config]
+tag-prefix = "{{crate_name}}-"  # e.g., manta-v1.0.4
+publish = true
+push = true
+tag = true
+allow-branch = ["main"]
+dependent-version = "upgrade"  # Update dependent crates' versions
+sign-tag = false  # Set to true if you use GPG signing
+
+# # Per-crate configuration
+# [crates.manta]
+# [crates.manta-ws]
+# [crates.manta-backend-dispatcher]
+# [crates.ochami-rs]
+# [crates.csm-rs]

@@ -1,0 +1,29 @@
+[packages] 
+name = "manta-project"
+authors = ["Manuel Sopena Ballesteros <msopena@cscs.ch>"]
+version = "0.1.0"
+edition = "2021"
+description = "Monorepo for the Manta project, containing multiple crates"
+license-file = "LICENSE"
+documentation = "https://github.com/eth-cscs/manta-project/blob/main/README.md"
+homepage = "https://github.com/eth-cscs/manta-project/blob/main/README.md"
+repository = "https://github.com/eth-cscs/manta-project"
+
+[workspace]
+members = [ 
+    #"crates/ochami-rs",
+    #"crates/csm-rs",
+    #"crates/manta-ws",
+    #"crates/manta",
+    #"crates/manta-backend-dispatcher"
+] 
+exclude = [
+    "crates/ochami-rs",
+    "crates/csm-rs",
+    "crates/manta-ws",
+    "crates/manta",
+    "crates/manta-backend-dispatcher"
+]
+resolver = "2"
+
+
