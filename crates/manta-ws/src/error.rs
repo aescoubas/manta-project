@@ -6,7 +6,7 @@ use hyper::{StatusCode, header};
 
  struct Error(manta_backend_dispatcher::error::Error);
 
- impl IntoResponse for manta_backend_dispatcher::error::Error {
+/* impl IntoResponse for manta_backend_dispatcher::error::Error {
   fn into_response(self) -> Response {
     // self.to_string()
     let status = StatusCode::INTERNAL_SERVER_ERROR;
@@ -17,9 +17,9 @@ use hyper::{StatusCode, header};
       .body(Body::from(body))
       .unwrap()
   }
-} 
+} */
 
- impl IntoResponse for axum::Error {
+/* impl IntoResponse for axum::Error {
   fn into_response(self) -> Response {
     // self.to_string()
     let status = StatusCode::INTERNAL_SERVER_ERROR;
@@ -30,4 +30,4 @@ use hyper::{StatusCode, header};
       .body(Body::from(body))
       .unwrap()
   }
-} 
+} */
