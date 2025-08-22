@@ -320,27 +320,49 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        crate:
+        include:
           - name: manta
             path: crates/manta
             output_prefix: manta
             tag_prefix: manta-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+            artifact_suffix: macOS-x86_64-apple-darwin-binary
+            file_suffix: -macos-x86_64
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+            artifact_suffix: macOS-aarch64-apple-darwin-binary
+            file_suffix: -macos-arm64
           - name: manta-backend-dispatcher
             path: crates/manta-backend-dispatcher
             output_prefix: manta_backend_dispatcher
             tag_prefix: manta-backend-dispatcher-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
           - name: manta-ws
             path: crates/manta-ws
             output_prefix: manta_ws
             tag_prefix: manta-ws-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
           - name: ochami-rs
             path: crates/ochami-rs
             output_prefix: ochami_rs
             tag_prefix: ochami-rs-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
           - name: csm-rs
             path: crates/csm-rs
             output_prefix: csm_rs
             tag_prefix: csm-rs-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
     steps:
       - uses: actions/checkout@v4
         with:
@@ -349,28 +371,31 @@ jobs:
       - name: Get version
         id: get_version
         run: |
-          cd ${{ matrix.crate.path }}
+          cd ${{ matrix.path }}
           VERSION=$(grep '^version =' Cargo.toml | head -n1 | cut -d '"' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Set tag
         id: set_tag
-        run: echo "tag=${{ matrix.crate.tag_prefix }}v${{ steps.get_version.outputs.version }}" >> $GITHUB_OUTPUT
+        run: echo "tag=${{ matrix.tag_prefix }}v${{ steps.get_version.outputs.version }}" >> $GITHUB_OUTPUT
 
-      - name: Download artifact for ${{ matrix.crate.name }}
-        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+      - name: Download artifact for ${{ matrix.name }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.output_prefix)] == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: ${{ matrix.crate.name }}-binary
+          name: ${{ matrix.name }}-${{ matrix.artifact_suffix }}
           path: artifacts/
 
-      - name: Attach binary to release for ${{ matrix.crate.name }}
-        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+      - name: Rename binary for ${{ matrix.name }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.output_prefix)] == 'true' }}
+        run: mv artifacts/${{ matrix.name }} artifacts/${{ matrix.name }}${{ matrix.file_suffix }}
+
+      - name: Attach binary to release for ${{ matrix.name }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.output_prefix)] == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.set_tag.outputs.tag }}
-          files: |
-            artifacts/${{ matrix.crate.name }}
+          files: artifacts/${{ matrix.name }}${{ matrix.file_suffix }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
 
