@@ -84,7 +84,7 @@ async fn main() -> core::result::Result<(), Box<dyn std::error::Error>> {
     };
   log::debug!("config - audit_file_path:  {audit_file_path}");
 
-  log_ops::configure(log_level, audit_file_path.as_str()); // log4rs programatically configuration
+  log_ops::configure(log_level, audit_file_path.as_str()); 
 
   if let Some(socks_proxy) = &site_detail_value.socks5_proxy {
     let socks_proxy = socks_proxy.to_string();
