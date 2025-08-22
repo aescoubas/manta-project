@@ -243,7 +243,7 @@ jobs:
           if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.output_prefix)] == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           uses: actions/upload-artifact@v4
           with:
-            name: ${{ matrix.name }}-${{ matrix.os }}${{ matrix.target && format('-{0}', matrix.target) || '' }}-binary
+            name: ${{ matrix.name }}-${{ runner.os }}${{ matrix.target && format('-{0}', matrix.target) || '' }}-binary
             path: ${{ matrix.path }}/target/${{ matrix.target && format('{0}/', matrix.target) || '' }}release/${{ matrix.name }}
 
   # trigger only on release-plz
@@ -433,7 +433,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
 
-
   build_homebrew_package:
     needs: [changed_files, release]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_any_changed == 'true' 
@@ -443,10 +442,16 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Download artifact for manta
+      - name: Download artifact for manta x86_64
         uses: actions/download-artifact@v4
         with:
-          name: manta-binary
+          name: manta-macOS-x86_64-apple-darwin-binary
+          path: artifacts/
+
+      - name: Download artifact for manta aarch64
+        uses: actions/download-artifact@v4
+        with:
+          name: manta-macOS-aarch64-apple-darwin-binary
           path: artifacts/
 
       - name: Generate formula file and upload it
@@ -456,14 +461,14 @@ jobs:
           MANTA_VERSION=$(grep -E '^version *\= *"([^"]+)"' -o0 Cargo.toml  | sed -r 's/version *\= *"([^"]+)"/\1/')
           echo "MANTA_VERSION: $MANTA_VERSION"
 
-          URL="https://github.com/aescoubas/manta-project/releases/download/manta-v${VERSION}/manta"
-          SHA=$(curl -L $URL | shasum -a 256 | cut -d ' ' -f 1)
+          X86_SHA=$(shasum -a 256 ../../artifacts/manta | cut -d ' ' -f 1)
+          ARM_SHA=$(shasum -a 256 ../../artifacts/manta | cut -d ' ' -f 1)
 
-          echo "SHA: $SHA"
+          echo "X86_SHA: $X86_SHA"
+          echo "ARM_SHA: $ARM_SHA"
 
           sed -ri "s/\{\{ *VERSION *\}\}/$MANTA_VERSION/g" manta.rb 
-          sed -ri "s/\{\{ *SHA *\}\}/$SHA/g" manta.rb 
+          sed -ri "s/\{\{ *X86_SHA *\}\}/$X86_SHA/g" manta.rb 
+          sed -ri "s/\{\{ *ARM_SHA *\}\}/$ARM_SHA/g" manta.rb 
 
-          cat manta.rb
-
-
+          cat manta.rb 
