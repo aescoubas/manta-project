@@ -246,11 +246,69 @@ jobs:
             name: ${{ matrix.name }}-${{ runner.os }}${{ matrix.target && format('-{0}', matrix.target) || '' }}-binary
             path: ${{ matrix.path }}/target/${{ matrix.target && format('{0}/', matrix.target) || '' }}release/${{ matrix.name }}
 
+  release_pr:
+    needs: changed_files
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+          - name: manta-backend-dispatcher
+            path: crates/manta-backend-dispatcher
+            output_prefix: manta_backend_dispatcher
+            tag_prefix: manta-backend-dispatcher-
+          - name: manta-ws
+            path: crates/manta-ws
+            output_prefix: manta_ws
+            tag_prefix: manta-ws-
+          - name: ochami-rs
+            path: crates/ochami-rs
+            output_prefix: ochami_rs
+            tag_prefix: ochami-rs-
+          - name: csm-rs
+            path: crates/csm-rs
+            output_prefix: csm_rs
+            tag_prefix: csm-rs-
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_RELEASE_TOKEN }}
+
+      - name: Install Rust
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Install release-plz
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        run: |
+          mkdir -p ~/.cargo/bin
+          curl -L https://github.com/MarcoIeni/release-plz/releases/latest/download/release-plz-x86_64-unknown-linux-gnu.tar.gz -o ~/.cargo/bin/release-plz.tar.gz
+          tar -xzf ~/.cargo/bin/release-plz.tar.gz -C ~/.cargo/bin/
+          echo "~/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Run release-plz release-pr
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        run: cd ${{ matrix.crate.path }} && release-plz release-pr --backend github --git-token $GITHUB_TOKEN --config ../../release-plz.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+
   # trigger only on release-plz
   release:
     needs: [changed_files, build_crates]
-      #if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'release-plz')
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' 
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'Release ')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -471,4 +529,4 @@ jobs:
           sed -ri "s/\{\{ *X86_SHA *\}\}/$X86_SHA/g" manta.rb 
           sed -ri "s/\{\{ *ARM_SHA *\}\}/$ARM_SHA/g" manta.rb 
 
-          cat manta.rb 
+          cat manta.rb
