@@ -1,5 +1,4 @@
-# .github/workflows/ci-and-release-pr.yaml
-name: CI and Release PR
+name: Check changed files and release
 
 env:
   CONTAINER_REGISTRY: ghcr.io  # GitHub Container Registry
@@ -248,7 +247,7 @@ jobs:
             path: ${{ matrix.path }}/target/${{ matrix.target && format('{0}/', matrix.target) || '' }}release/${{ matrix.name }}
 
   release_pr:
-    needs: build_crates
+    needs: changed_files
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
@@ -305,3 +304,229 @@ jobs:
         run: cd ${{ matrix.crate.path }} && release-plz release-pr --backend github --git-token $GITHUB_TOKEN --config ../../release-plz.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+
+  # trigger only on release-plz
+  release:
+    needs: [changed_files, build_crates]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'Release ')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+          - name: manta-backend-dispatcher
+            path: crates/manta-backend-dispatcher
+            output_prefix: manta_backend_dispatcher
+            tag_prefix: manta-backend-dispatcher-
+          - name: manta-ws
+            path: crates/manta-ws
+            output_prefix: manta_ws
+            tag_prefix: manta-ws-
+          - name: ochami-rs
+            path: crates/ochami-rs
+            output_prefix: ochami_rs
+            tag_prefix: ochami-rs-
+          - name: csm-rs
+            path: crates/csm-rs
+            output_prefix: csm_rs
+            tag_prefix: csm-rs-
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_RELEASE_TOKEN }}
+
+      - name: Install Rust
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          #- name: Install release-plz
+          #  if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+          #  run: cargo install release-plz --locked
+
+      - name: Install release-plz
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        #run: cargo install release-plz --locked
+        run: |
+          mkdir -p ~/.cargo/bin
+          curl -L https://github.com/MarcoIeni/release-plz/releases/latest/download/release-plz-x86_64-unknown-linux-gnu.tar.gz -o ~/.cargo/bin/release-plz.tar.gz
+          tar -xzf ~/.cargo/bin/release-plz.tar.gz -C ~/.cargo/bin/
+          echo "~/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Run release-plz release
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+        run: cd ${{ matrix.crate.path }} && release-plz release --forge github --git-token $GITHUB_TOKEN --config ../../release-plz.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  attach_assets:
+    needs: [changed_files, release]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+            artifact_suffix: macOS-x86_64-apple-darwin-binary
+            file_suffix: -macos-x86_64
+          - name: manta
+            path: crates/manta
+            output_prefix: manta
+            tag_prefix: manta-
+            artifact_suffix: macOS-aarch64-apple-darwin-binary
+            file_suffix: -macos-arm64
+          - name: manta-backend-dispatcher
+            path: crates/manta-backend-dispatcher
+            output_prefix: manta_backend_dispatcher
+            tag_prefix: manta-backend-dispatcher-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
+          - name: manta-ws
+            path: crates/manta-ws
+            output_prefix: manta_ws
+            tag_prefix: manta-ws-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
+          - name: ochami-rs
+            path: crates/ochami-rs
+            output_prefix: ochami_rs
+            tag_prefix: ochami-rs-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
+          - name: csm-rs
+            path: crates/csm-rs
+            output_prefix: csm_rs
+            tag_prefix: csm-rs-
+            artifact_suffix: Linux-binary
+            file_suffix: -linux
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Get version
+        id: get_version
+        run: |
+          cd ${{ matrix.path }}
+          VERSION=$(grep '^version =' Cargo.toml | head -n1 | cut -d '"' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set tag
+        id: set_tag
+        run: echo "tag=${{ matrix.tag_prefix }}v${{ steps.get_version.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Download artifact for ${{ matrix.name }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.output_prefix)] == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.name }}-${{ matrix.artifact_suffix }}
+          path: artifacts/
+
+      - name: Rename binary for ${{ matrix.name }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.output_prefix)] == 'true' }}
+        run: mv artifacts/${{ matrix.name }} artifacts/${{ matrix.name }}${{ matrix.file_suffix }}
+
+      - name: Attach binary to release for ${{ matrix.name }}
+        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.output_prefix)] == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.set_tag.outputs.tag }}
+          files: artifacts/${{ matrix.name }}${{ matrix.file_suffix }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+
+  build_publish_container_image:
+    needs: [changed_files, release]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_ws_any_changed == 'true' 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Check Podman version
+        run: podman version
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GH_RELEASE_TOKEN }}" | podman login ${{ env.CONTAINER_REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Get version for manta-ws
+        id: get_version
+        run: |
+          cd crates/manta-ws
+          VERSION=$(grep '^version =' Cargo.toml | head -n1 | cut -d '"' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set tag
+        id: set_tag
+        run: echo "tag=manta-ws-v${{ steps.get_version.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Podman build for manta-ws
+        run: |
+          cd crates/manta-ws
+          podman build -t ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/manta-ws:${{ steps.set_tag.outputs.tag }} .
+          podman push ${{ env.CONTAINER_REGISTRY }}/${{ github.repository_owner }}/manta-ws:${{ steps.set_tag.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+
+  build_homebrew_package:
+    needs: [changed_files, release]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.changed_files.outputs.manta_any_changed == 'true' 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Download artifact for manta x86_64
+        uses: actions/download-artifact@v4
+        with:
+          name: manta-macOS-x86_64-apple-darwin-binary
+          path: artifacts/
+
+      - name: Download artifact for manta aarch64
+        uses: actions/download-artifact@v4
+        with:
+          name: manta-macOS-aarch64-apple-darwin-binary
+          path: artifacts/
+
+      - name: Generate formula file and upload it
+        id: generate_formula_file
+        run: |
+          cd crates/manta
+          MANTA_VERSION=$(grep -E '^version *\= *"([^"]+)"' -o0 Cargo.toml  | sed -r 's/version *\= *"([^"]+)"/\1/')
+          echo "MANTA_VERSION: $MANTA_VERSION"
+
+          X86_SHA=$(shasum -a 256 ../../artifacts/manta | cut -d ' ' -f 1)
+          ARM_SHA=$(shasum -a 256 ../../artifacts/manta | cut -d ' ' -f 1)
+
+          echo "X86_SHA: $X86_SHA"
+          echo "ARM_SHA: $ARM_SHA"
+
+          sed -ri "s/\{\{ *VERSION *\}\}/$MANTA_VERSION/g" manta.rb 
+          sed -ri "s/\{\{ *X86_SHA *\}\}/$X86_SHA/g" manta.rb 
+          sed -ri "s/\{\{ *ARM_SHA *\}\}/$ARM_SHA/g" manta.rb 
+
+          cat manta.rb
