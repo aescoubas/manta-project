@@ -218,71 +218,69 @@ jobs:
           #          echo "build" > target/release/${{ matrix.crate.name }}
 
   build_crates:
-    needs: [changed_files, check_formatting, lint, test_crates]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        crate:
-          - name: manta
-            path: crates/manta
-            output_prefix: manta
-          - name: manta-backend-dispatcher
-            path: crates/manta-backend-dispatcher
-            output_prefix: manta_backend_dispatcher
-          - name: manta-ws
-            path: crates/manta-ws
-            output_prefix: manta_ws
-          - name: ochami-rs
-            path: crates/ochami-rs
-            output_prefix: ochami_rs
-          - name: csm-rs
-            path: crates/csm-rs
-            output_prefix: csm_rs
-        os: [ubuntu-latest]
-        include:
-          - crate:
-              name: manta
+      needs: [changed_files, check_formatting, lint, test_crates]
+      runs-on: ${{ matrix.os }}
+      strategy:
+        fail-fast: false
+        matrix:
+          crate:
+            - name: manta
               path: crates/manta
               output_prefix: manta
-            os: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+            - name: manta-backend-dispatcher
+              path: crates/manta-backend-dispatcher
+              output_prefix: manta_backend_dispatcher
+            - name: manta-ws
+              path: crates/manta-ws
+              output_prefix: manta_ws
+            - name: ochami-rs
+              path: crates/ochami-rs
+              output_prefix: ochami_rs
+            - name: csm-rs
+              path: crates/csm-rs
+              output_prefix: csm_rs
+          os: [ubuntu-latest]
+          include:
+            - crate:
+                name: manta
+                path: crates/manta
+                output_prefix: manta
+              os: macos-latest
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            submodules: recursive
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
+        - name: Install Rust
+          uses: dtolnay/rust-toolchain@stable
+          with:
+            toolchain: stable
 
-      - name: Build on Linux
-        if: ${{ matrix.os == 'ubuntu-latest' && needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-        run: |
-          cargo --version
-          rustc --version
-          cd ${{ matrix.crate.path }} 
-          cargo build --release
+        - name: Build on Linux
+          if: ${{ matrix.os == 'ubuntu-latest' && needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+          run: |
+            cargo --version
+            rustc --version
+            cd ${{ matrix.crate.path }} 
+            cargo build --release
 
-      - name: Build on macOS
-        if: ${{ matrix.os == 'macos-latest' && needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
-        run: |
-          cargo --version
-          rustc --version
-          rustup target add x86_64-apple-darwin
-          rustup target add aarch64-apple-darwin
-          cd ${{ matrix.crate.path }} 
-          cargo build --release --target x86_64-apple-darwin
-          cargo build --release --target aarch64-apple-darwin
-          #mkdir -p target/universal/release
-          #lipo -create -output target/universal/release/${{ matrix.crate.name }} target/x86_64-apple-darwin/release/${{ matrix.crate.name }} target/aarch64-apple-darwin/release/${{ matrix.crate.name }}
+        - name: Build on macOS
+          if: ${{ matrix.os == 'macos-latest' && needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' }}
+          run: |
+            cargo --version
+            rustc --version
+            rustup target add x86_64-apple-darwin
+            rustup target add aarch64-apple-darwin
+            cd ${{ matrix.crate.path }} 
+            cargo build --release --target x86_64-apple-darwin
+            cargo build --release --target aarch64-apple-darwin
 
-      - name: Upload artifacts
-        if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.crate.name }}-binary
-          path: ${{ matrix.crate.path }}/target/release/${{ matrix.crate.name }}
+        - name: Upload artifacts
+          if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.crate.output_prefix)] == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          uses: actions/upload-artifact@v4
+          with:
+            name: ${{ matrix.crate.name }}-${{ runner.os }}-binary
+            path: ${{ matrix.os == 'ubuntu-latest' ? '${{ matrix.crate.path }}/target/release/${{ matrix.crate.name }}' : join( ['${{ matrix.crate.path }}/target/x86_64-apple-darwin/release/${{ matrix.crate.name }}', '${{ matrix.crate.path }}/target/aarch64-apple-darwin/release/${{ matrix.crate.name }}'], "\n" ) }}
 
             #  release_pr:
             #    needs: [changed_files, build_crates]
