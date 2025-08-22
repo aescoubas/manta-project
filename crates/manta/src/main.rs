@@ -15,7 +15,6 @@ use crate::common::log_ops;
 
 #[tokio::main]
 async fn main() -> core::result::Result<(), Box<dyn std::error::Error>> {
-  //println!("async main");
   // DHAT (profiling)
   // #[cfg(feature = "dhat-heap")]
   // let _profiler = dhat::Profiler::new_heap();
@@ -34,8 +33,6 @@ async fn main() -> core::result::Result<(), Box<dyn std::error::Error>> {
   let backend_tech = &site_detail_value.backend;
   let shasta_base_url = &site_detail_value.shasta_base_url;
   let shasta_barebone_url = shasta_base_url // HACK to not break compatibility with
-    // old configuration file. TODO: remove this when needed in the future and all users are
-    // using the right configuration file
     .strip_suffix("/apis")
     .unwrap_or(&shasta_base_url);
   let shasta_api_url = match backend_tech.as_str() {
