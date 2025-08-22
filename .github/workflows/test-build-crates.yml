@@ -237,6 +237,7 @@ jobs:
             else
               cargo build --release
             fi
+            ls -R crates/manta/target
 
         - name: Upload artifacts
           if: ${{ needs.changed_files.outputs[format('{0}_any_changed', matrix.output_prefix)] == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
