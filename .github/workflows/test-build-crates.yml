@@ -530,3 +530,4 @@ jobs:
           sed -ri "s/\{\{ *ARM_SHA *\}\}/$ARM_SHA/g" manta.rb 
 
           cat manta.rb
+
