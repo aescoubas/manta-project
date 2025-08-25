@@ -1,0 +1,924 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.84.0](https://github.com/aescoubas/manta-project/compare/csm-rs-v0.83.1...csm-rs-v0.84.0) - 2025-08-25
+
+### Added
+
+- feature
+- feature
+- [**breaking**] function to create a BOS session was not showing the BOS session name in logs::info, however, we do show this information when creating a BOS sessiontemplate, this behaviour make command 'apply sat-file' counter intuitive and this patch address this by making sure we log the BOS session name upon creation
+- improve error handling
+- move interactive code in functionality to delete and cancel CFS sessions to higher levels
+- filter BOS by group name
+- overwrite cfs configuration
+- implement power status
+- implement BootParametersTrait function
+- add function to check CFS health
+- add function to check CFS health
+- Avoid external libraries from having to import kube-rs when connecting to node console
+- add new functions to ImsTrait
+- add new interactive command function to delete data related to a configuration
+- delete and cancel session now checks if image is used to boot a node
+- start integration of CFS components with backend dispatcher
+- integrate all functions in trait ClusterTemplateTrait
+- integrate new function 'delete_image'wa from ImsTrait
+- integration with BOS session interfaces in backend dispatcher
+- integrate trait GetTemplatesTrait
+- add new trait for cli function command 'manta ger images'
+- function to filter CFS sessions includes entries related to groups_*
+- function to filter BOS sessiontemplates includes entries related to groups_*
+- cfs session logs now contains logs for git_clone, inventory and ansible containers
+- add 'Send' trait
+- add function to get group map from a list of members
+- cfs session logs now chains the log streams of git clone, inventory and ansible containers
+- new function to clean a list of groups from the auth token by filtering out keycloak roles unwanted, site wide groups and CSM roles and subroles
+- include 'inventory' container logs in CFS session logs
+- add function to check if user is admin or not
+- new functionalities get/add/update/delete redfish endpoint
+- new functionalities add/update/delete erdfish endpoints
+- new functionalities add/update/delete erdfish endpoints
+- new functionalities add/update/delete boot parameters
+- add new command to get list of groups
+- add new command 'migrate restore'
+- add new 'apply session' command
+- add new backend command to 'get images'
+- add new backend command 'apply_hw_cluster_pin'
+- migrate commands apply session and get configuration to backend dispatcher
+- update backend dispatch version
+- implement interfaces to get session and get session log stream
+- add new function interface get_node_metadata_available
+- improve error management
+- improve error management
+- improve error management
+- update backend_dispatcher version
+- add new Error type to catch 'console errors'
+- migrate traits
+- new trait for groups
+- add method to get k8s container logs for cama web server
+- testing segregating traits into modules by type of product
+- add support to 'pa_admin' keycloak role to identify when the user has admin privileges
+- add functions to manage nid and xname translation
+- fix HSM component
+- fix HSM component
+- power on now accepts nid nodes
+- add support for HSM components
+- add support for HSM components
+- add support for HSM components
+- migrate function to get node hardware components to backend dispatcher
+- integrate function to migrate nodes between hsm groups to backend dispatcher
+- integrate function to migrate nodes between hsm groups to backend dispatcher
+- integrate functions to add support to manipulate group members with backend dispatcher
+- clean code
+- update backend dispatcher version
+- add functions to add and delete a HSM group
+- use backend-dispatcher crate
+- update cargo dependencies
+- implement new functions from backend
+- clean code
+- rename infra crate to backend_connector
+- add new method used to expand list of nodes
+- new method 'get_hsm_available' moved to backend dispatcher
+- add static enum dispatch to integrate with high level business layers
+- update infra crate version
+- integrate infra traits
+- add traits related to IaaS functionality
+- improve kernel parameter management
+- session creation sync can now print CFS session logs
+- improve perfomance when fetching node details
+- improve ims image filtering
+- introduce the concept of generic images which everyone has access to
+- new functions to manage JWT claims
+- method to get members from hsm group returns an Option
+- add new methods to add/remove xnames to HSM groups
+- migrate to CFS configurations v3
+- add CFS configuration v3 structs and migrate http_client to it
+- add method to CFS sessions to return all targets available
+- add new fn to get cfs config, cfs sessions, bos sessiontemplates
+- migrate to CFS API v3
+- add support to HSM memberships API
+- performance improvement on getting node details
+- get nodes shows time laps to fetch information form CSM
+- CFS API migrated to v3 to create new sessions (needed for remote
+- change feedback to user while rebooting nodes
+- PCS can now block power status changes
+- parse SAT yaml to CFS configuration struct resolves git branch to
+- add function to get global cfs options
+- add function to migrate nodes between 2 different hsm groups
+- add keycloak integration
+- improve performance when getting CFS component details for a large amount of nodes
+- add function to check network to backend api
+- kernel parameters functions to add/remove/update kernel params
+- more on PCS integration
+- start PCS integration
+- add smd service values endpoint
+- add function to filter system hsm groups (eg alps, prealps, alpsm, alpse, alpsb, etc)
+- add hack to remove system HSM groups (eg alps, prealps, alpse,
+- add CFS components v3
+- remove dependency to openssl
+- add new endpoint to check CFS service status in CSM
+- improve log messages
+- get_configuration can filter based on names through glob patterns
+- get CFS configuration derivatives (CFS sessions, BOS sessiontemplate and images related to a CFS configuration)
+- add cargo features for ochami
+- add members to hsm group
+- improve feedback provided to user when waiting nodes' power state to change
+- integrate min_age and max_age fields to 'get session' command
+- integrate min_age and max_age fields to 'get session' command
+- add new field to CFS configuration called special_parameters, this new field is consumed by SAT when creating IMS images
+- handle auth tokens for multiple sites at the same time
+- create BSS struct matching CSM entities and refactor functions
+- add function to get commit details related to an annotated tag
+- add methods to manipulate HSM group members
+- add new function to calculate the hw component summary for a vec of struct NodeSumary
+- get k8s configmap
+- get gitea commit id from git tag
+- add new helper functions for CFS sessions and BOS sessiontemplate ([#7](https://github.com/aescoubas/manta-project/pull/7))
+- add new method to get a tuple with image_id, cfs_configuration and target related from a list of CFS sessions
+- add HSM http_client module with structs
+- add structs for hw components
+- add new function to filter cfs sessions from a list of nodes
+- cluster power management
+- add utility functions
+- get node details now shows CFS configuration related to boot image
+- filter bos sessiontemplates now can filter by cfs configuration
+- get configuration using struct
+- get configurations filtered by hsm now takes into consideration
+- get images now uses BOS sessiontemplates and CFS sessions to
+
+### Fixed
+
+- improve error management
+- enum name
+- BOS boot_set.rootfs_provider value was hardcoded to 'cpss3' and this is incompatible with iSCSI. This fix sets boot_set.rootfs_provider in bos to the same value user specifies in the SAT file
+- BOS boot_set.rootfs_provider value was hardcoded to 'cpss3' and this is incompatible with iSCSI. This fix sets boot_set.rootfs_provider in bos to the same value user specifies in the SAT file
+- remove interactive features in function apply_session
+- manta apply sat-file is not validating the CFS configuration properly and it overwrites existing CFS configurations, this is not dessired since we lose the link between the CFS configuration and the image it built
+- change keyworkd "ref" -> "branch" in Cargo.toml
+- use git as dependency
+- *(redfish)* We need to make functions related to http requests to CSM as close as possible to the CSM API. Therefore we will change the argument to create refish endpoints from struct Redfish to RedfishArray
+- updating desired configuration
+- url to add a member to a hsm group
+- package version
+- command 'apply sat-file' not filtering configurations properly with flag --sessiontemplate-only used
+- rollback to CFS v2
+- mesa function to call when using 'get_cfs_component' trait signature
+- import of backend dispatcher CFS files
+- memory management compilation error
+- when fetching k8s or vcs credentials, update the Vault path based on site
+- restore code
+- command 'get images' was missing images when user is admin
+- function to get if a session build a generic image
+- gitea url always pointing to alps url. Now it changes based on 'site name' selected by user
+- do not panic if gitea repo does not have refs
+- method to get node hardware components
+- SAT processing fails when watching CFS sessions logs because the process won't wait the CFS session to finish
+- SAT processing fails when watching CFS sessions logs because the process won't wait the CFS session to finish
+- function to get hsm group details
+- function argument misalignment
+- filter cfs session including generic sessions
+- dependencies
+- bug fetching cfs sessions
+- improve error management
+- functions related to access console/conman now returns a Result intead of exiting the process
+- functions related to access console/conman now returns a Result intead of exiting the process
+- typo in fields related to hw inventory hsn nic struct
+- typo in fields related to hw inventory hsn nic struct
+- return Result instead of panicwa
+- add hardware inventory mandatory fields
+- improve SMD inventory
+- CFS session logs not printed on screen if CFS session already finished
+- authentication url
+- add and delete kernel parameters
+- improve error management
+- 'std::env:var' does not implement Send trait https://doc.rust-lang.org/std/env/struct.Vars.html#impl-Send-for-Vars and we are calling 'await' inside a loop holding std::env::Vars which will block the async since the kernel won't be able to continue the task in another thread, to solve this, we will move the code calling await after finishing with std::env::Var
+- fix Cargo.toml
+- boot parameter operations
+- improve kernel parameter operations
+- creating a CFS configuration from SAT yaml not processing product commit ids
+- error management with gitea API
+- bug in fetching init container state
+- create CFS session type dynamic
+- update time to finish CFS session to finish because gpu images are taking too long:wa
+- bug assumming all BOS sessiontemplates has a CFS configuration
+- logic to update boot image
+- struct and methods to update CFS component
+- increate time spen to check if nodes power state has changed
+- change capmc source from hsm to redfish since it is more reliable
+- improve methods to get cfs session ansible logs
+- bug processing kernel parameters (eg 'quiet') which are not in the format of 'key=value' format
+- bug checking auth token authentication response from keycloak
+- remove timeout when checking API
+- marshalling error
+- bug checking authentication token
+- remove  fild in BOS session v2
+- wrong serde code in pcs module
+- move stdout message to log
+- error management when any HSM group in JWT token does not exists
+- bug fetching gitea commit id details
+- power on nodes not managing power states properly. Eg function loops if node power status is READY
+- IMS job creation returns CSM error msg is request failt
+- improve std out message
+- fix counters when fetching CFS components in 'get cluster' command
+- get commit id details from gitea
+- bug fetching single HSM group
+- add missing close bracket
+- crach when querying too many xnames against CFS components
+- fetch git tag from gitea
+- restore functionatily for BOS session v1
+- change gitea external url to use because in AlpsM is not resolving fast enough
+- message when powering on node
+- integratin with gitea to fet all refs in a repository
+- converting from SAT to serde_yaml failing with wront field name for
+- filter bos sessiontemplate by list of xnames
+- introduct thiserror crate for error management
+- add 'tag' field to cfs configuration layer struct
+- get node info not getting the right cfs confgiuration related to an image
+- bug in 'get nodes' subcommand where cfs configuration related to boot image was incorrect
+- change method to get file size from tokio to std
+- version number
+- merge migration functionality
+- merge migration code
+- fix merge request
+- fix get configuration becuase it was not filtering bos sessiontemplat properly
+- fix bug when fetching cfs sessions based that succeeded
+- rust memory checker
+- get nodes don't fail if can't find the CFS configuration used to build an image
+- bug fetching images
+- bug fetching images
+- replace std sleep to tokio sleep
+- change std sleep to tokio sleep
+- update version
+- rust project version
+- node rust module
+- get configurations breaking if number of cfs components to query
+- update git2 library version
+- fix bug ignoring commit field in cfs configuration in sat files
+- fix hw inventory deserialization
+- fix error messages from log error to log debug for some http clients
+- fix k8s bugs
+- fix bugs
+- fix bug operating with structs
+- fix mesa version
+- fix bug with CFS configuration struct
+- fix bug deleting data because CSM APIs don't return payload on the response
+- fix bug deleting data with configurations with no CFS session target image
+- fix bug when ims api returns only 1 image entity
+- fix version to a non published one in crates.io
+- fix bug changing shasta::cfs::components::utils module to public
+- fix bug with xname regex
+- fix bug managing authentication response form the server
+- fix bug managing authentication response form the server
+- fix bug validating xname
+- fix bug in authentication method not taking user token from file
+- fix use modules
+
+### Other
+
+- test
+- test
+- test pipeline
+- Release csm-rs version 0.8.0
+- migrate from json Value to struct
+- Release csm-rs version 0.7.1
+- command 'apply sat-file --dryrun' was missrepresenting the image data when creating a session template, this patch fixes this by making sure we reuse the relevant information in the sat file so we command shows a better representation of what is going to be created
+- Release csm-rs version 0.7.0
+- clean code
+- Release csm-rs version 0.6.1
+- update Cargo.toml
+- Release csm-rs version 0.6.0
+- clean code
+- refactor code to reduce the number of memory allocations
+- clean code
+- format code
+- clean code
+- Release csm-rs version 0.5.0-beta.19
+- update Cargo.toml
+- clean code
+- clean code
+- clean code
+- Release csm-rs version 0.5.0-beta.18
+- Release csm-rs version 0.5.0-beta.17
+- Release csm-rs version 0.5.0-beta.16
+- update Cargo.toml
+- Release csm-rs version 0.5.0-beta.15
+- update Cargo.toml
+- Release csm-rs version 0.5.0-beta.14
+- Release csm-rs version 0.5.0-beta.13
+- update Cargo.toml
+- Release csm-rs version 0.5.0-beta.12
+- Release csm-rs version 0.5.0-beta.11
+- clean code
+- Release csm-rs version 0.5.0-beta.10
+- clean code
+- clean Cargo.toml
+- clean code
+- Release csm-rs version 0.5.0-beta.7
+- Release csm-rs version 0.5.0-beta.6
+- update Cargo.toml
+- Release mesa version 0.5.1
+- Release mesa version 0.5.0
+- apply new format rules
+- Release mesa version 0.5.0-beta.5
+- error handling
+- Release mesa version 0.5.0-beta.4
+- Release mesa version 0.5.0-beta.3
+- Release mesa version 0.5.0-beta.2
+- Release mesa version 0.5.0-beta.1
+- Release mesa version 0.42.3-beta.106
+- refactor rename module backend-dispatcher to manta-backend-dispatcher
+- Release mesa version 0.42.3-beta.105
+- update Cargo.toml
+- Release mesa version 0.42.3-beta.104
+- clean code
+- cargo fix
+- Release mesa version 0.42.3-beta.103
+- add terminal size to backend with connecting to a node console
+- Release mesa version 0.42.3-beta.102
+- update Cargo.toml
+- Release mesa version 0.42.3-beta.101
+- Release mesa version 0.42.3-beta.100
+- clean code
+- update Cargo.toml
+- Release mesa version 0.42.3-beta.98
+- Release mesa version 0.42.3-beta.97
+- Release mesa version 0.42.3-beta.96
+- update Cargo.toml
+- Release mesa version 0.42.3-beta.95
+- update Cargo.toml
+- clean code
+- clean code
+- cargo fix
+- merge traits related to BOS
+- Release mesa version 0.42.3-beta.94
+- Release mesa version 0.42.3-beta.93
+- Release mesa version 0.42.3-beta.92
+- Release mesa version 0.42.3-beta.91
+- fixes
+- Release mesa version 0.42.3-beta.90
+- 'delete_and_cancel_session' trait signature
+- Release mesa version 0.42.3-beta.89
+- Release mesa version 0.42.3-beta.88
+- Release mesa version 0.42.3-beta.87
+- Release mesa version 0.42.3-beta.86
+- Release mesa version 0.42.3-beta.85
+- update Cargo.toml
+- Release mesa version 0.42.3-beta.84
+- Release mesa version 0.42.3-beta.83
+- Release mesa version 0.42.3-beta.82
+- Release mesa version 0.42.3-beta.81
+- Release mesa version 0.42.3-beta.80
+- clean code
+- clean code
+- Release mesa version 0.42.3-beta.79
+- update Cargo.toml
+- Release mesa version 0.42.3-beta.78
+- Release mesa version 0.42.3-beta.77
+- Release mesa version 0.42.3-beta.76
+- Release mesa version 0.42.3-beta.75
+- Release mesa version 0.42.3-beta.74
+- Release mesa version 0.42.3-beta.73
+- clean code
+- Release mesa version 0.42.3-beta.72
+- update Cargo.toml
+- update Cargo.toml
+- Release mesa version 0.42.3-beta.71
+- Release mesa version 0.42.3-beta.70
+- Release mesa version 0.42.3-beta.69
+- Release mesa version 0.42.3-beta.68
+- update Cargo.toml
+- Release mesa version 0.42.3-beta.67
+- update Cargo.toml
+- clean code
+- Release mesa version 0.42.3-beta.66
+- Release mesa version 0.42.3-beta.65
+- fix Cargo.toml
+- Release mesa version 0.42.3-beta.64
+- clean keycloak roles
+- code housekeeping
+- Release mesa version 0.42.3-beta.63
+- remove vault path and vault role id
+- Release mesa version 0.42.3-beta.62
+- adapt interfaces for new vault authentication
+- Release mesa version 0.42.3-beta.61
+- Release mesa version 0.42.3-beta.60
+- Release mesa version 0.42.3-beta.59
+- Release mesa version 0.42.3-beta.58
+- Release mesa version 0.42.3-beta.57
+- Release mesa version 0.42.3-beta.56
+- Release mesa version 0.42.3-beta.55
+- Release mesa version 0.42.3-beta.54
+- Release mesa version 0.42.3-beta.53
+- Release mesa version 0.42.3-beta.52
+- in migrate_backup, change the execution of the post script to the end of the function. This was needed in order to migrate the rest of the migration_restore functionality to the csm backend (mesa)
+- Release mesa version 0.42.3-beta.51
+- Release mesa version 0.42.3-beta.50
+- Release mesa version 0.42.3-beta.48
+- update backend dispatcher version
+- Release mesa version 0.42.3-beta.47
+- update cargo config
+- improve error management
+- Release mesa version 0.42.3-beta.46
+- Release mesa version 0.42.3-beta.45
+- Release mesa version 0.42.3-beta.44
+- Release mesa version 0.42.3-beta.43
+- change struct name HardwareMetadataArray to NodeMetadataArray
+- Release mesa version 0.42.3-beta.42
+- Release mesa version 0.42.3-beta.41
+- improve error management
+- Release mesa version 0.42.3-beta.40
+- Release mesa version 0.42.3-beta.39
+- Release mesa version 0.42.3-beta.38
+- Release mesa version 0.42.3-beta.37
+- Release mesa version 0.42.3-beta.36
+- improve error management
+- Release mesa version 0.42.3-beta.35
+- improve error management
+- Release mesa version 0.42.3-beta.34
+- improve error management
+- Release mesa version 0.42.3-beta.33
+- remove 'std::process::exit':wa
+- remove 'std::process::exit':wa
+- Release mesa version 0.42.3-beta.32
+- improve error management
+- Release mesa version 0.42.3-beta.31
+- improve error management
+- Release mesa version 0.42.3-beta.30
+- improve error management
+- Release mesa version 0.42.3-beta.29
+- improve error management
+- Release mesa version 0.42.3-beta.28
+- improve error management
+- Release mesa version 0.42.3-beta.27
+- Release mesa version 0.42.3-beta.25
+- hsm hardware inventory
+- Release mesa version 0.42.3-beta.24
+- interfaces
+- Release mesa version 0.42.3-beta.23
+- clean crates
+- Release mesa version 0.42.3-beta.22
+- migrate traits
+- organize traits
+- Release mesa version 0.42.3-beta.21
+- Release mesa version 0.42.3-beta.20
+- Release mesa version 0.42.3-beta.19
+- Release mesa version 0.42.3-beta.18
+- Release mesa version 0.42.3-beta.17
+- Release mesa version 0.42.3-beta.16
+- Release mesa version 0.42.3-beta.15
+- Release mesa version 0.42.3-beta.14
+- Release mesa version 0.42.3-beta.13
+- Release mesa version 0.42.3-beta.12
+- Release mesa version 0.42.3-beta.11
+- Release mesa version 0.42.3-beta.10
+- clean code
+- Release mesa version 0.42.3-beta.9
+- Release mesa version 0.42.3-beta.8
+- Release mesa version 0.42.3-beta.7
+- change struct.rs file names to types.rs
+- clean code
+- Release mesa version 0.42.3-beta.6
+- Release mesa version 0.42.3-beta.5
+- Release mesa version 0.42.3-beta.4
+- Release mesa version 0.42.3-beta.3
+- Release mesa version 0.42.3-beta.2
+- Release mesa version 0.42.3-beta.1
+- Release mesa version 0.42.2
+- Release mesa version 0.42.1
+- Release mesa version 0.42.1-beta.22
+- Release mesa version 0.42.1-beta.21
+- Release mesa version 0.42.1-beta.20
+- Release mesa version 0.42.1-beta.19
+- Release mesa version 0.42.1-beta.18
+- BSS operations returns BootParameters struct rather than serde_json Value
+- Release mesa version 0.42.1-beta.17
+- Release mesa version 0.42.1-beta.16
+- Release mesa version 0.42.1-beta.15
+- Release mesa version 0.42.1-beta.14
+- Release mesa version 0.42.1-beta.13
+- Release mesa version 0.42.1-beta.12
+- clean code
+- clean code
+- Release mesa version 0.42.1-beta.11
+- Release mesa version 0.42.1-beta.10
+- clean code
+- Release mesa version 0.42.1-beta.9
+- clean code
+- Release mesa version 0.42.1-beta.8
+- Release mesa version 0.42.1-beta.7
+- Release mesa version 0.42.1-beta.6
+- Release mesa version 0.42.1-beta.5
+- Release mesa version 0.42.1-beta.4
+- Release mesa version 0.42.1-beta.3
+- Release mesa version 0.42.1-beta.2
+- Release mesa version 0.42.1-beta.1
+- clean code
+- clean code
+- clean code
+- clean code
+- clean code
+- Release mesa version 0.42.0
+- Release mesa version 0.41.35
+- cfs_configuration.branch and cfs_configuration.tag are now based on a list of values a specific commit may be related to
+- Release mesa version 0.41.34
+- Release mesa version 0.41.33
+- Release mesa version 0.41.32
+- Release mesa version 0.41.31
+- Release mesa version 0.41.30
+- clean compilation warnings
+- clean code
+- Release mesa version 0.41.29
+- Release mesa version 0.41.28
+- clean lint warning messages
+- cargo quick fix
+- git_single ssh public key should require username
+- Release mesa version 0.41.27
+- Release mesa version 0.41.26
+- Release mesa version 0.41.25
+- Release mesa version 0.41.24
+- improve comments
+- Release mesa version 0.41.23
+- Release mesa version 0.41.22
+- Release mesa version 0.41.21
+- Release mesa version 0.41.20
+- Release mesa version 0.41.19
+- Release mesa version 0.41.18
+- Release mesa version 0.41.17
+- Release mesa version 0.41.16
+- clean code
+- Release mesa version 0.41.15
+- Release mesa version 0.41.14
+- Release mesa version 0.41.13
+- borrow checker importing elem to vec
+- Release mesa version 0.41.12
+- clean code
+- Release mesa version 0.41.11
+- clean rust modules
+- Release mesa version 0.41.10
+- node mogration function should not print on stdout
+- Release mesa version 0.41.9
+- clean code to migrate nodes across hsm groups
+- Release mesa version 0.41.8
+- clean code
+- Release mesa version 0.41.7
+- Release mesa version 0.41.6
+- Release mesa version 0.41.5
+- Release mesa version 0.41.4
+- Release mesa version 0.41.3
+- Release mesa version 0.41.2
+- Release mesa version 0.41.1
+- Release mesa version 0.41.0
+- Release mesa version 0.40.15
+- power messages sent to stderr
+- improve log messages
+- Release mesa version 0.40.14
+- Release mesa version 0.40.13
+- clean code
+- Release mesa version 0.40.12
+- clean code
+- consolidate struct for CFS component
+- Release mesa version 0.40.11
+- Release mesa version 0.40.10
+- Release mesa version 0.40.9
+- Release mesa version 0.40.8
+- Release mesa version 0.40.7
+- Release mesa version 0.40.6
+- Release mesa version 0.40.5
+- Release mesa version 0.40.4
+- Release mesa version 0.40.3
+- improve function to check connectivity to CSM backend API
+- Release mesa version 0.40.2
+- rename method
+- Release mesa version 0.40.1
+- code housekeeping
+- Release mesa version 0.40.0
+- Release mesa version 0.39.2
+- Release mesa version 0.39.1
+- Release mesa version 0.39.0
+- code refactor exercise
+- Refactoring health checks using common a common base function ([#18](https://github.com/aescoubas/manta-project/pull/18))
+- Release mesa version 0.38.1
+- Release mesa version 0.38.0
+- Release mesa version 0.37.20
+- Release mesa version 0.37.19
+- clean code
+- Release mesa version 0.37.18
+- Release mesa version 0.37.17
+- Release mesa version 0.37.16
+- clean code
+- Release mesa version 0.37.15
+- add new logs
+- Release mesa version 0.37.14
+- Release mesa version 0.37.13
+- Release mesa version 0.37.12
+- Release mesa version 0.37.11
+- Release mesa version 0.37.10
+- improve std messages
+- Release mesa version 0.37.9
+- improve code documentation
+- improve code documentation
+- Release mesa version 0.37.8
+- Release mesa version 0.37.7
+- code improvement
+- improve log messages when fetching
+- Release mesa version 0.37.6
+- get BSS boot parameters for large clusters
+- clean code
+- Release mesa version 0.37.5
+- remove debug messages
+- Release mesa version 0.37.4
+- Release mesa version 0.37.3
+- Release mesa version 0.37.2
+- clean code and performance improvement when filtering CFS configurations
+- Release mesa version 0.37.1
+- improve the log information
+- improve code related to fetching entites in CSM
+- improve code related to fetching entites in CSM
+- Release mesa version 0.37.0
+- Release mesa version 0.36.0
+- Release mesa version 0.35.8
+- move structs for hw_inventory
+- rename module hsm::shasta to hsm::hw_component
+- rename module hw_inventory::hs_components to hw_inventory::struct
+- remove modules hsm::component_status::shasta and hsm::component_status::mesa
+- remove modules hsm::shasta and hsm::mesa
+- move hsm::mesa::http_client functions to hsm::shasta::http_client
+- disable hsm::mesa::http_client::get method
+- hsm code from serde_json::Value to HSMGroup struct or String
+- move hw_component struct in hw_inventory module
+- integrate hsm group struct to hsm::group module
+- Release mesa version 0.35.7
+- Add and remove nodes from HSM groups. ([#16](https://github.com/aescoubas/manta-project/pull/16))
+- Release mesa version 0.35.6
+- Release mesa version 0.35.5
+- functions to get hw inventory for a node now uses struct
+- Release mesa version 0.35.4
+- clean code
+- Release mesa version 0.35.3
+- improve error handling in gitea functions
+- Release mesa version 0.35.2
+- Release mesa version 0.35.1
+- clean code and improve log messages
+- Release mesa version 0.35.0
+- Release mesa version 0.34.5
+- Release mesa version 0.34.4
+- Release mesa version 0.34.3
+- Release mesa version 0.34.2
+- add contributors guide
+- rename contriguting file
+- add contributors guide
+- Release mesa version 0.34.1
+- Release mesa version 0.34.0
+- clean code
+- Release mesa version 0.33.2
+- move test code to /tests/ directory
+- Release mesa version 0.33.1
+- Release mesa version 0.33.0
+- Release mesa version 0.32.1
+- Release mesa version 0.32.0
+- Release mesa version 0.31.2
+- Release mesa version 0.31.1
+- clean code based on clippy suggestions
+- Release mesa version 0.31.0
+- Release mesa version 0.30.8
+- Release mesa version 0.30.7
+- Release mesa version 0.30.6
+- Release mesa version 0.30.5
+- Release mesa version 0.30.4
+- Release mesa version 0.30.3
+- improve debug messages
+- Release mesa version 0.30.2
+- Release mesa version 0.30.1
+- clean stdout messages
+- Release mesa version 0.30.0
+- Release mesa version 0.29.1
+- Release mesa version 0.29.0
+- Release mesa version 0.28.1
+- Release mesa version 0.28.0
+- Release mesa version 0.27.6
+- Release mesa version 0.27.5
+- Release mesa version 0.27.4
+- clean code
+- Release mesa version 0.27.3
+- clean code
+- Release mesa version 0.27.2
+- clean code and improve stdout messages
+- Release mesa version 0.27.1
+- stdout messages
+- Release mesa version 0.27.0
+- clean code
+- clean code
+- Release mesa version 0.26.0
+- Release mesa version 0.25.0
+- Return eTag after uploading objects to S3 ([#6](https://github.com/aescoubas/manta-project/pull/6))
+- add helper functions in CfsSessionGetResponse struct
+- Release mesa version 0.24.8
+- Release mesa version 0.24.7
+- Release mesa version 0.24.6
+- clean code
+- Release mesa version 0.24.5
+- Add progress bar to downloads/uploads from/to S3 ([#5](https://github.com/aescoubas/manta-project/pull/5))
+- Release mesa version 0.24.4
+- Release mesa version 0.24.3
+- Release mesa version 0.24.2
+- Release mesa version 0.24.1
+- format code
+- Release mesa version 0.24.1
+- apply clippy suggestions
+- Release mesa version 0.24.0
+- Release mesa version 0.23.7
+- Release mesa version 0.23.6
+- Release mesa version 0.23.5
+- Release mesa version 0.23.4
+- Release mesa version 0.23.3
+- Release mesa version 0.23.2
+- Release mesa version 0.23.1
+- Release mesa version 0.23.0
+- Release mesa version 0.22.0
+- clean code
+- clean code
+- refactor code
+- add new cfs session get_and_filter and reformat code
+- clean code
+- cfs_components http client now returns reqwest::Error which is implements Send trait
+- clean code
+- clean code
+- merge common/node_ops with node/utils module
+- merge common/hsm_ops with hsm/utils module
+- merge common/hsm_ops with hsm/utils module
+- housekeeping around HSM module
+- refactor HSM module
+- remove functions to print table
+- clean code
+- housekeeping code
+- code housekeeping
+- code housekeeping
+- fmt code
+- Release mesa version 0.21.0
+- clean code and add functions to filter CFS session and CFS
+- Release mesa version 0.20.2
+- clean code
+- Release mesa version 0.20.1
+- Release mesa version 0.19.0
+- Release mesa version 0.19.0
+- rename method name to get multiple CFS components
+- cfs configuration struct
+- high refactoring
+- Release mesa version 0.18.2
+- format code
+- Release mesa version 0.18.1
+- rename method calls
+- Release mesa version 0.18.0
+- Release mesa version 0.17.11
+- organize code around ims image API
+- Release mesa version 0.17.10
+- clean code related to cfs configuration
+- Release mesa version 0.17.9
+- clean code related to cfs configuration
+- Release mesa version 0.17.8
+- Release mesa version 0.17.7
+- Release mesa version 0.17.6
+- add methods to fetch tuple with image id, cfs configuration
+- Release mesa version 0.17.5
+- Release mesa version 0.17.4
+- Release mesa version 0.17.3
+- clean code
+- S3 integration new ([#3](https://github.com/aescoubas/manta-project/pull/3))
+- Release mesa version 0.17.2
+- make cfs configuration struct fields public
+- Release mesa version 0.17.1
+- clean code
+- Release mesa version 0.17.0
+- clean code
+- Release mesa version 0.16.11
+- add new function to print CFS session logs
+- apply clippy suggestions
+- Release mesa version 0.16.10
+- Release mesa version 0.16.9
+- elavorate high level functions
+- Release mesa version 0.16.8
+- Release mesa version 0.16.7
+- Release mesa version 0.16.6
+- refactor code and add new high level functions
+- Release mesa version 0.16.5
+- Release mesa version 0.16.4
+- Release mesa version 0.16.3
+- Release mesa version 0.16.2
+- Release mesa version 0.16.1
+- make http client to accept self signed certs
+- Release mesa version 0.16.0
+- Release mesa version 0.15.6
+- Release mesa version 0.15.6
+- add data types for cfs configuration
+- init, pending to test
+- Release mesa version 0.15.5
+- implement suggestions from clippy
+- Release mesa version 0.15.4
+- Release mesa version 0.15.3
+- Release mesa version 0.15.2
+- Clean code related to delete CSM entities
+- Release mesa version 0.15.1
+- clean code
+- Release mesa version 0.15.0
+- Release mesa version 0.14.2
+- update README
+- Release mesa version 0.14.1
+- add limit to get images
+- Release mesa version 0.14.0
+- get ims images sorted by creation date and time
+- Release mesa version 0.13.0
+- get images method now returns Result<Vec<Value>, Err...>
+- Release mesa version 0.12.0
+- add new functionality to get ims job detaild from job id
+- Release mesa version 0.11.0
+- add delete ims image using csm api soft delete
+- add support to delete apis
+- Release mesa version 0.10.0
+- add new calls to IMS public-keys to handle ssh user keys
+- add new calls to IMS public-keys to handle ssh user keys
+- Release mesa version 0.9.5
+- add integration with IMS JOB creation
+- add integration with IMS JOB creation
+- Release mesa version 0.9.4
+- update logging
+- Release mesa version 0.9.3
+- improve logging messages
+- Release mesa version 0.9.2
+- add new method to connect to CFS sessino target ansible container to build an image
+- Release mesa version 0.9.1
+- improve logging messages
+- Release mesa version 0.9.0
+- update kube-rs crate version to most recent
+- Release mesa version 0.6.46
+- update logging messages
+- Release mesa version 0.6.45
+- add Component struct to BOS and add enabled flag when changing desired configuration using CFS Component
+- Release mesa version 0.6.44
+- Update bss update API to add PATCH verb
+- Release mesa version 0.6.43
+- avoid serializing empty fields
+- Release mesa version 0.6.42
+- Update cfs compoment update API to v2 and PATCH verb
+- Release mesa version 0.6.41
+- Add new CSM API to update desired configuration on multiple xnames
+- Release mesa version 0.6.40
+- Release mesa version 0.6.39
+- Add new CSM API call to update Component desired configuration
+- Release mesa version 0.6.38
+- update BOS sessiontemplate constructor
+- Release mesa version 0.6.37
+- make CfsSession fields public
+- Release mesa version 0.6.36
+- refactor function to get all IMS images in the system
+- Release mesa version 0.6.35
+- refactor xname validation
+- Release mesa version 0.6.34
+- improve error handling when attaching console container
+- Release mesa version 0.6.33
+- clean logging messages and fix cfs session logs for CSM 1.3.x
+- Release mesa version 0.6.32
+- clean logging messages
+- Release mesa version 0.6.31
+- Release mesa version 0.6.30
+- Release mesa version 0.6.29
+- Release mesa version 0.6.28
+- Release mesa version 0.6.27
+- Release mesa version 0.6.26
+- add cfs session field ansible_passthrough
+- Release mesa version 0.6.25
+- restore cargo version
+- restore cargo version
+- allow authentication through environment variable MANTA_CSM_TOKEN
+- update vault secret path to other paces in code needed
+- Release mesa version 0.6.23
+- add new feature to customize the vault secret path
+- add Clone derive to CfsConfiguration and CfsSession structs
+- Release mesa version 0.6.22
+- remove github workflow
+- remove github workflow
+- Release mesa version 0.6.21
+- refactor code and bring more kubernetes functions from manta
+- Release mesa version 0.6.20
+- clean dependencies and fix cargo.toml
+- Release mesa version 0.6.19
+- update READMe
+- Release mesa version 0.6.18
+- Release mesa version 0.6.17
+- remove release section in github workflow because this is a library which does not generate a binary
+- Release mesa version 0.6.16
+- add github workflow
+- Refactor code
+- basic solution building a k8s client with mutual TLS and socks5 connection
+- Release mesa version 0.6.15
+- update README
+- Release mesa version 0.6.14
+- add README file
+- remove wildcard '*' in build-dependencies section in Cargo.toml
+- change license meta data in Cargo.toml
+- init
