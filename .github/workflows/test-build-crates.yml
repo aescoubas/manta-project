@@ -247,7 +247,7 @@ jobs:
             path: ${{ matrix.path }}/target/${{ matrix.target && format('{0}/', matrix.target) || '' }}release/${{ matrix.name }}
 
   release_pr:
-    needs: changed_files
+    needs: [changed_files, build_crates]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:

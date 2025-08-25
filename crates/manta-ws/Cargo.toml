@@ -3,7 +3,7 @@ name = "manta-ws"
 description = "HTTP server for Mesa"
 version = "0.1.15"
 edition = "2024"
-publish = false
+publish = true
 
 [profile.release]
 opt-level = 'z'     # Optimize for size
